@@ -1,0 +1,16 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/Or8Way.hdl
+
+
+CHIP Or9Way {
+    IN in[9];
+    OUT out;
+
+    PARTS:
+    Or4Way(in=in[0..3],out=or0123);
+    Or4Way(in=in[4..7],out=or4567);
+    Or(a=or0123,b=or4567,out=or01234567);
+    Or(a=or01234567,b=in[8],out=out);
+}

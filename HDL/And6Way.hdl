@@ -1,0 +1,17 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/Or8Way.hdl
+
+
+CHIP And6Way{
+    IN a,b,c,d,e,f;
+    OUT out;
+
+    PARTS:
+    And(a=a, b=b,out=ab);
+    And(a=c, b=d,out=cd);
+    And(a=e, b=f,out=ef);
+    And(a=ab,b=cd,out=abcd);
+    And(a=abcd, b=ef, out=out);
+}

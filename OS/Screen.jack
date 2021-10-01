@@ -1,0 +1,148 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Screen.jack
+
+/**
+ * A library of functions for displaying graphics on the screen.
+ * The Hack physical screen consists of 256 rows (indexed 0..255, top to bottom)
+ * of 512 pixels each (indexed 0..511, left to right). The top left pixel on 
+ * the screen is indexed (0,0).
+ */
+class Screen {
+
+    /** Initializes the Screen. */
+    static boolean color;
+    static Array twoToThe;
+    function void init() {
+        var int i;
+        let color = true;
+        let twoToThe = Array.new(15);
+
+        let twoToThe[0] = 1;
+        let i = 1;
+        while (i < 16){
+            let twoToThe[i] = 2*twoToThe[i-1];
+            let i = i + 1;
+        }
+        return;
+    }
+
+    /** Erases the entire screen. */
+    function void clearScreen() {
+        var int y;
+        do Screen.setColor(false);
+
+        let y = 0;
+        while(y<256){
+            do Screen.drawLine(0, y, 511, y);
+            let y = y+1;
+        }
+        return;
+    }
+
+    /** Sets the current color, to be used for all subsequent drawXXX commands.
+     *  Black is represented by true, white by false. */
+    function void setColor(boolean b) {
+        let color = b;
+        return;
+    }
+
+    /** Draws the (x,y) pixel, using the current color. */
+    function void drawPixel(int x, int y) {
+        var int address, x_mod_16, value;
+        let address = ((32*y) + (x/16));
+        let value = Memory.peek(16384 + address);
+
+        let x_mod_16 = x & 15;
+        if (color){
+            let value = value | twoToThe[x_mod_16];
+        }else {
+            let value = value & (~twoToThe[x_mod_16]);
+        }
+        do Memory.poke(16384 + address, value);
+        return;
+    }
+
+    function boolean le(int a,int b){
+        if ((a<b) | (a=b)){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
+    function void drawLine(int x1, int y1, int x2, int y2) {
+        var int a, b, diff,dx,dy, dirx, diry;
+
+        let dx = x2-x1;
+        let dy = y2-y1;
+        let a = 0;
+        let b = 0;
+        let diff = 0;
+
+        let dirx = 1;
+        let diry = 1;
+        if (dx < 0){
+            let dirx = -1;
+        }
+        if (dy<0){
+            let diry = -1;
+        }
+
+        if (dy = 0){
+            while(Screen.le(dirx*a, dirx*dx)){
+                do Screen.drawPixel(x1+a, y1);
+                let a = a+dirx;
+            }
+            return;
+        } 
+
+        if (dx = 0){
+            while(Screen.le(diry*b, diry*dy)){
+                do Screen.drawPixel(x1, y1+b);
+                let b = b+diry;
+            }
+            return;
+        }
+
+
+        while(Screen.le(dirx*a, dirx*dx) & Screen.le(diry*b, diry*dy)){
+            do Screen.drawPixel(x1+a, y1+b);
+            if (diff <0){
+                let a = a+dirx;
+                let diff = diff + (diry*dy);
+            }
+            else
+            {
+                let b = b+diry;
+                let diff=diff - (dirx*dx);
+            }
+        }
+        return;
+    }
+
+    /** Draws a filled rectangle whose top left corner is (x1, y1)
+     * and bottom right corner is (x2,y2), using the current color. */
+    function void drawRectangle(int x1, int y1, int x2, int y2) {
+        while (Screen.le(y1,y2)){
+            do Screen.drawLine(x1,y1,x2,y1);
+            let y1 = y1 + 1;
+        }
+        return;
+    }
+
+    /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
+    function void drawCircle(int x, int y, int r) {
+        var int dx,dy;
+        let dy = -r;
+        while(Screen.le(dy,r)){
+            let dx = Math.sqrt((r*r) - (dy*dy));
+            do Screen.drawLine(x-dx, y+dy, x+dx,y+dy );
+            let dy = dy + 1;
+        }
+        return;
+
+    }
+}

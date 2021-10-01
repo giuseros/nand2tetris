@@ -1,0 +1,11 @@
+CHIP MSBLow{
+    IN
+       in[16], no;
+    OUT
+       out;
+
+    PARTS:
+    Mux(a=in[15],b=true,out=signbit);
+    Not(in=signbit,out=notsignbit);
+    Mux(a=signbit,b=notsignbit,sel=no,out=out);
+}

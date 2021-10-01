@@ -1,0 +1,29 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/09/HelloWorld/Main.jack
+
+/** Hello World program. */
+class Main {
+   function void main() {
+      /* Prints some text using the standard library. */
+
+      // Program to compute C = A*B + C
+      // A is an mxk matrix
+      // B is an kxn matrix
+      // C is an mxn matrix
+
+      var Matrix a,b,c;
+      var Matrix tmp1;
+      let a = Matrix.new(10,10);
+      let b = Matrix.new(10,10);
+      let c = Matrix.new(10,10);
+      do a.fillOnes();
+      do b.fillOnes();
+      do c.fillOnes();
+      let tmp1 = a.mulm(b);
+      let c = tmp1.addm(c);
+      do c.print();
+      return;
+   }
+}

@@ -1,0 +1,94 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Memory.jack
+
+/**
+ * This library provides two services: direct access to the computer's main
+ * memory (RAM), and allocation and recycling of memory blocks. The Hack RAM
+ * consists of 32,768 words, each holding a 16-bit binary number.
+ */ 
+class Memory {
+    static array ram;
+    static array heap;
+    static int freeList;
+
+    /** Initializes the class. */
+    function void init() {
+        let ram = 0;
+        let heap = 2048;
+        let freeList = 2048;
+        let heap[0] = 0;
+        let heap[1] = 14335;
+        return;
+    }
+
+    /** Returns the RAM value at the given address. */
+    function int peek(int address) {
+        return ram[address];
+    }
+
+    /** Sets the RAM value at the given address to the given value. */
+    function void poke(int address, int value) {
+        let ram[address] = value;
+        return;
+    }
+
+    /** Finds an available RAM block of the given size and returns
+     *  a reference to its base address. */
+    function int alloc(int size) {
+        var int next_size, new_size, next, current;
+        var array block;
+
+        let current = freeList;
+        let next = current;
+        //do Output.printInt(size);
+        //do Output.println();
+        //do Output.printInt(next);
+        //do Output.println();
+
+        while (next > 0){
+            let next_size = ram[next+1];
+            if ((next_size > size+2) | (next_size = size+2)){
+                let new_size = ram[next+1]-(size+2);
+
+                //do Output.printInt(next_size);
+                //do Output.println();
+                //do Output.printInt(new_size);
+                //do Output.println();
+
+                if (new_size > 0){
+                    let ram[next+1] = new_size;
+                } else {
+                    let ram[current] = ram[next];
+                }
+
+                
+                //do Output.printInt(next+new_size+1);
+                //do Output.println();
+                let ram[next+new_size] = 0;
+                let ram[next+new_size+1] = size;
+
+                //do Output.printInt(ram+next+new_size+2);
+                //do Output.println();
+                return ram+next+new_size+2;
+
+            }
+            let current = next;
+            let next = ram[next];
+        }
+        return 0;
+    }
+
+    /** De-allocates the given object (cast as an array) by making
+     *  it available for future allocations. */
+    function void deAlloc(Array o) {
+        var int current;
+        let current = freeList;
+        while(ram[current] > 0){
+            let current = ram[current];
+        }
+        let ram[current] = o-2;
+        return;
+    }    
+}

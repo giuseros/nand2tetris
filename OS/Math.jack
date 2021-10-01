@@ -1,0 +1,168 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Math.jack
+
+/**
+ * A library of commonly used mathematical functions.
+ * Note: Jack compilers implement multiplication and division using OS method calls.
+ */
+class Math {
+    static Array twoToThe;
+
+    /** Initializes the library. */
+    function void init() {
+        let twoToThe = Array.new(16);
+        let twoToThe[0] = 1;
+        let twoToThe[1] = 2;
+        let twoToThe[2] = 4;
+        let twoToThe[3] = 8;
+        let twoToThe[4] = 16;
+        let twoToThe[5] = 32;
+        let twoToThe[6] = 64;
+        let twoToThe[7] = 128;
+        let twoToThe[8] = 256;
+        let twoToThe[9] = 512;
+        let twoToThe[10] = 1024;
+        let twoToThe[11] = 2048;
+        let twoToThe[12] = 4096;
+        let twoToThe[13] = 8192;
+        let twoToThe[14] = 16384;
+        //let twoToThe[15] = 2*twoToThe[14];
+        return;
+
+    }
+
+    /** Returns the absolute value of x. */
+    function int abs(int x) {
+        if ((x > 0) | (x = 0)) {
+            return x;
+        } else {
+            return -x;
+        }
+
+    }
+
+    /** Returns the product of x and y. 
+     *  When a Jack compiler detects the multiplication operator '*' in the 
+     *  program's code, it handles it by invoking this method. In other words,
+     *  the Jack expressions x*y and multiply(x,y) return the same value.
+     */
+    function int multiply(int x, int y) {
+        var int sum, shiftedX, i, w, s;
+        let s = 1;
+        if (x < 0) {
+            let x = -x;
+            let s = -s;
+        }
+        if (y < 0){
+           let y = -y;
+           let s = -s;
+        }
+
+        let  sum = 0;
+        let  shiftedX = x;
+        let  i = 0;
+        let  w = 15;
+
+        while ( i < w ){
+            if (Math.bit(y, i)){
+                let sum = sum + shiftedX;
+            }
+            let shiftedX = shiftedX+shiftedX;
+            let i = i + 1;
+        }
+        if (s < 0) {
+            let sum = -sum;
+        }
+        return sum;
+    }
+
+    /** Returns the integer part of x/y.
+     *  When a Jack compiler detects the multiplication operator '/' in the 
+     *  program's code, it handles it by invoking this method. In other words,
+     *  the Jack expressions x/y and divide(x,y) return the same value.
+     */
+    function int divide(int x, int y) {
+        var int sign, out;
+
+        if (x<0){
+           let sign = -sign;
+           let x = -x;
+        }
+        if (y<0){
+           let sign = -sign;
+           let y = -y;
+        }
+        
+	// Core routine
+        let out = Math.divide_recursive(x, y);
+      
+        if (sign < 0){
+            let out = -out;
+        }
+        return out;
+
+    }
+
+    function int divide_recursive(int x, int y) {
+        var in q, qy, out;
+
+        if ((y>x) | (y<0)){
+            return 0;
+        }
+
+        let q = Math.divide(x, y+y);
+        let qy = q*y;
+        if ( (x - (qy+qy) ) < y){
+            let out=(q+q);
+        } else {
+            let out=(q+q+1);
+        }
+        return out;
+    }
+
+
+    /** Returns the integer part of the square root of x. */
+    function int sqrt(int x) {
+        var int y, j, tmp;
+        let y = 0;
+        let j = 0;
+        let tmp =0;
+
+        let j = 7;
+        while ( (j>0) | (j=0) ){
+            let tmp = (y+twoToThe[j])*(y+twoToThe[j]);
+            if (( (tmp < x) | (tmp = x) ) & (tmp > 0)){
+                let y = (y + twoToThe[j]);
+            }
+            let j = j-1;
+        }
+        return y;
+    }
+
+    /** Returns the greater number. */
+    function int max(int a, int b) {
+        if (a>b) {
+            return a;
+        } else {
+            return b;
+        }
+    }
+
+    /** Returns the smaller number. */
+    function int min(int a, int b) {
+        if (a<b) {
+            return a;
+        } else {
+            return b;
+        }
+    }
+
+    function boolean bit(int x, int i){
+        var int tmp;
+        let tmp = x & twoToThe[i];
+        return ( (tmp > 0) | (tmp < 0) );
+
+    }
+}

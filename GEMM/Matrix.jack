@@ -1,0 +1,181 @@
+class Matrix{
+field array a;
+field int M, N;
+static int stack;
+
+function int allocateMatrix(int size){
+        // Implementing a stack allocator for matrices
+	var int old_stack;
+	if (stack = 0){
+		let stack = 5000;
+	}
+	let old_stack = stack;
+	let stack = stack+size;
+	return old_stack;
+}
+
+function void deallocateMatrix(int m, int n){
+        // Implementing a stack allocator for matrices
+	let stack = stack-m*n;
+        return;
+}
+
+constructor Matrix new(int m, int n){
+	let a = Matrix.allocateMatrix(m*n);
+	let M = m; 
+	let N = n;
+	return this;
+}
+
+
+method int at(int i, int j){
+       if ((i < M) & (j<N)){
+	       return a[i*N+j];
+       } else {
+	       return 0;
+       }
+}
+
+method void set(int i, int j, int val){
+       if ((i < M) & (j<N)){
+	       let a[i*N+j] = val;
+       }
+       return;
+}
+
+method void dispose(){
+	do Matrix.deallocateMatrix(M, N);
+	do Memory.deAlloc(this);
+        return;
+}
+
+method void fillOnes()
+{
+      var int i,j;
+      let i = 0;
+      while(i<M){
+           let j = 0;
+           while (j<N){
+              do set(i, j, 1);
+              let j = j+1;
+           }
+           let i = i + 1;
+      }
+      return;
+}
+
+method int rows(){
+      return M;
+}
+
+method int cols(){
+      return N;
+}
+
+method Matrix mulm(Matrix other){
+      var Matrix out;
+      var int i,j,k,tmp;
+      if (~(other.cols() = other.rows())){
+	  let out = Matrix.new(0, 0);
+          do Output.print("wrong size");
+          do Output.println();
+          return out;
+      }
+      let out = Matrix.new(M, other.cols());
+      let i = 0;
+      while(i<M){
+           let j = 0;
+           while (j<other.cols()){
+                let k = 0;
+                let tmp = 0;
+                while(k < N){
+                   let tmp = tmp + (at(i,k) * other.at(k, j));
+                   let k = k + 1;
+                }
+	        do out.set(i,j,tmp);
+                let j = (j+1);
+           }
+           let i = i + 1;
+      }
+      return out;
+}
+
+
+method Matrix addm(Matrix other){
+      var Matrix out;
+      var int i,j,k,tmp;
+      if ( ~(M = other.rows()) | ~(N = other.cols()) ){
+	  let out = Matrix.new(0, 0);
+          do Output.print("wrong size");
+          do Output.println();
+          return out;
+      }
+      let out = Matrix.new(M, other.cols());
+      let i = 0;
+      while(i<M){
+           let j = 0;
+           while (j<N){
+	        do out.set(i,j,at(i,j)+other.at(i,j));
+                let j = j+1;
+           }
+           let i = i + 1;
+      }
+      return out;
+}
+
+method Matrix addi(int val){
+      var Matrix out;
+      var int i,j,k,tmp;
+      let out = Matrix.new(M, other.cols());
+      let i = 0;
+      while(i<M){
+           let j = 0;
+           while (j<N){
+	        do out.set(i,j,at(i,j)+val);
+                let j = j+1;
+           }
+           let i = i + 1;
+      }
+      return out;
+}
+
+method Matrix muli(int val){
+      var Matrix out;
+      var int i,j,k,tmp;
+      let out = Matrix.new(M, other.cols());
+      let i = 0;
+      while(i<M){
+           let j = 0;
+           while (j<N){
+	        do out.set(i,j,at(i,j)+val);
+                let j = j+1;
+           }
+           let i = i + 1;
+      }
+      return out;
+}
+
+
+method void print(){
+      var int i, j;
+
+      let i = 0;
+      do Output.printString("[");
+      while(i<M){
+           let j = 0;
+           while (j<N){
+              do Output.printInt(a[i*M + j]);
+              do Output.printString(" ");
+              let j = j+1;
+           }
+           if (i = (M-1)){
+	      do Output.printString("]");
+	   }
+           do Output.println();
+           let i = i + 1;
+      }
+      return;
+}
+
+
+}

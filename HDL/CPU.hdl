@@ -1,0 +1,209 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/05/CPU.hdl
+
+/**
+ * The Hack CPU (Central Processing unit), consisting of an ALU,
+ * two registers named A and D, and a program counter named PC.
+ * The CPU is designed to fetch and execute instructions written in 
+ * the Hack machine language. In particular, functions as follows:
+ * Executes the inputted instruction according to the Hack machine 
+ * language specification. The D and A in the language specification
+ * refer to CPU-resident registers, while M refers to the external
+ * memory location addressed by A, i.e. to Memory[A]. The inM input 
+ * holds the value of this location. If the current instruction needs 
+ * to write a value to M, the value is placed in outM, the address 
+ * of the target location is placed in the addressM output, and the 
+ * writeM control bit is asserted. (When writeM==0, any value may 
+ * appear in outM). The outM and writeM outputs are combinational: 
+ * they are affected instantaneously by the execution of the current 
+ * instruction. The addressM and pc outputs are clocked: although they 
+ * are affected by the execution of the current instruction, they commit 
+ * to their new values only in the next time step. If reset==1 then the 
+ * CPU jumps to address 0 (i.e. pc is set to 0 in next time step) rather 
+ * than to the address resulting from executing the current instruction. 
+ */
+
+CHIP CPU {
+
+    IN  inM[16],         // M value input  (M = contents of RAM[A])
+        instruction[16], // Instruction for execution
+        reset;           // Signals whether to re-start the current
+                         // program (reset==1) or continue executing
+                         // the current program (reset==0).
+
+    OUT outM[16],        // M value output
+        writeM,          // Write to M? 
+        addressM[15],    // Address in data memory (of M)
+        pc[15];          // address of next instruction
+
+    PARTS:
+
+    Not(in=instruction[6], out=notC6);
+    Not(in=instruction[7], out=notC5);
+    Not(in=instruction[8], out=notC4);
+    Not(in=instruction[9], out=notC3);
+    Not(in=instruction[10], out=notC2);
+    Not(in=instruction[11], out=notC1);
+    Not(in=instruction[12], out=notA);
+
+    Not(in=notA, out=A);
+    Not(in=notC1, out=C1);
+    Not(in=notC2, out=C2);
+    Not(in=notC3, out=C3);
+    Not(in=notC4, out=C4);
+    Not(in=notC5, out=C5);
+    Not(in=notC6, out=C6);
+
+    // Decode compute
+    /*1,0,1,0,1,0*/  And6Way(a=C1,b=notC2,c=C3,d=notC4,e=C5,f=notC6,out=row0);   
+    /*1,1,1,1,1,1*/  And6Way(a=C1,b=C2,c=C3,d=C4,e=C5,f=C6,out=row1);            
+    /*1,1,1,0,1,0*/  And6Way(a=C1,b=C2,c=C3,d=notC4,e=C5,f=notC6,out=row2);      
+    /*0,0,1,1,0,0*/  And6Way(a=notC1,b=notC2,c=C3,d=C4,e=notC5,f=notC6,out=row3);
+    /*1,1,0,0,0,0*/  And6Way(a=C1,b=C2,c=notC3,d=notC4,e=notC5,f=notC6,out=row4);
+    /*0,0,1,1,0,1*/  And6Way(a=notC1,b=notC2,c=C3,d=C4,e=notC5,f=C6,out=row5);      
+    /*1,1,0,0,0,1*/  And6Way(a=C1,b=C2,c=notC3,d=notC4,e=notC5,f=C6,out=row6);      
+    /*0,0,1,1,1,1*/  And6Way(a=notC1,b=notC2,c=C3,d=C4,e=C5,f=C6,out=row7);      
+    /*1,1,0,0,1,1*/  And6Way(a=C1,b=C2,c=notC3,d=notC4,e=C5,f=C6,out=row8);      
+    /*0,1,1,1,1,1*/  And6Way(a=notC1,b=C2,c=C3,d=C4,e=C5,f=C6,out=row9);      
+    /*1,1,0,1,1,1*/  And6Way(a=C1,b=C2,c=notC3,d=C4,e=C5,f=C6,out=row10);     
+    /*0,0,1,1,1,0*/  And6Way(a=notC1,b=notC2,c=C3,d=C4,e=C5,f=notC6,out=row11);     
+    /*1,1,0,0,1,0*/  And6Way(a=C1,b=C2,c=notC3,d=notC4,e=C5,f=notC6,out=row12);     
+    /*0,0,0,0,1,0*/  And6Way(a=notC1,b=notC2,c=notC3,d=notC4,e=C5,f=notC6,out=row13);     
+    /*0,1,0,0,1,1*/  And6Way(a=notC1,b=C2,c=notC3,d=notC4,e=C5,f=C6,out=row14);     
+    /*0,0,0,1,1,1*/  And6Way(a=notC1,b=notC2,c=notC3,d=C4,e=C5,f=C6,out=row15);     
+    /*0,0,0,0,0,0*/  And6Way(a=notC1,b=notC2,c=notC3,d=notC4,e=notC5,f=notC6,out=row16);     
+    /*0,1,0,1,0,1*/  And6Way(a=notC1,b=C2,c=notC3,d=C4,e=notC5,f=C6,out=row17);     
+
+    And(a=row0, b=notA, out=c0); // Done
+    And(a=row1, b=notA, out=c1); // Done
+    And(a=row2, b=notA, out=cneg1); // Done
+    And(a=row3, b=notA, out=cD); // Done
+    And(a=row4, b=notA, out=cA);  // Done
+    And(a=row5, b=notA, out=cnotD); // Done
+    And(a=row6, b=notA, out=cnotA); // Done
+    And(a=row7, b=notA, out=cnegD); // Done
+    And(a=row8, b=notA, out=cnegA); // Done
+    And(a=row9, b=notA, out=cDplus1);  // Done
+    And(a=row10, b=notA, out=cAplus1);//Done
+    And(a=row11, b=notA, out=cDminus1); // Done
+    And(a=row12, b=notA, out=cAminus1); // Done
+    And(a=row13, b=notA, out=cDplusA); // Done
+    And(a=row14, b=notA, out=cDminusA); // Done
+    And(a=row15, b=notA, out=cAminusD); // Done
+    And(a=row16, b=notA, out=cDandA); // Done
+    And(a=row17, b=notA, out=cDorA); // Done
+
+    And4Way(d=true, a=row4, b=A, c=instruction[15], out=cM);
+    And4Way(d=true, a=row6, b=A, c=instruction[15], out=cnotM);
+    And4Way(d=true, a=row8, b=A, c=instruction[15], out=cnegM);
+    And4Way(d=true, a=row10, b=A, c=instruction[15], out=cMplus1);
+    And4Way(d=true, a=row12, b=A, c=instruction[15], out=cMminus1);
+    And4Way(d=true, a=row13, b=A, c=instruction[15], out=cDplusM);
+    And4Way(d=true, a=row14, b=A, c=instruction[15], out=cDminusM);
+    And4Way(d=true, a=row15, b=A, c=instruction[15], out=cMminusD);
+    And4Way(d=true, a=row16, b=A, c=instruction[15], out=cDandM);
+    And4Way(d=true, a=row17, b=A, c=instruction[15], out=cDorM);
+
+    // Decode dest 
+    Not(in=instruction[3], out=notd3);
+    Not(in=instruction[4], out=notd2);
+    Not(in=instruction[5], out=notd1);
+
+    Not(in=notd1,out=d1);
+    Not(in=notd2,out=d2);
+    Not(in=notd3,out=d3);
+
+    And4Way(d=instruction[15], a=notd1, b=notd2, c=notd3, out=dnull);
+    And4Way(d=instruction[15], a=notd1, b=notd2, c=d3,out=dM);
+    And4Way(d=instruction[15], a=notd1, b=d2, c=notd3,out=dD);
+    And4Way(d=instruction[15], a=notd1, b=d2, c=d3, out=dMD);
+    And4Way(d=instruction[15], a=d1, b=notd2, c=notd3,out=dA);
+    And4Way(d=instruction[15], a=d1, b=notd2, c=d3,out=dAM);
+    And4Way(d=instruction[15], a=d1, b=d2, c=notd3,out=dAD);
+    And4Way(d=instruction[15], a=d1, b=d2, c=d3,out=dAMD);
+
+    // Decode jump
+    Not(in=instruction[0], out=notj3);
+    Not(in=instruction[1], out=notj2);
+    Not(in=instruction[2], out=notj1);
+
+    Not(in=notj1,out=j1);
+    Not(in=notj2,out=j2);
+    Not(in=notj3,out=j3);
+
+    And4Way(d= instruction[15], a=notj1, b=notj2, c=notj3, out=jnull);
+    And4Way(d= instruction[15], a=notj1, b=notj2, c=j3,out=jgt);
+    And4Way(d= instruction[15], a=notj1, b=j2, c=notj3,out=jeq);
+    And4Way(d= instruction[15], a=notj1, b=j2, c=j3, out=jge);
+    And4Way(d= instruction[15], a=j1, b=notj2, c=notj3,out=jlt);
+    And4Way(d= instruction[15], a=j1, b=notj2, c=j3,out=jne);
+    And4Way(d= instruction[15], a=j1, b=j2, c=notj3,out=jle);
+    And4Way(d= instruction[15], a=j1, b=j2, c=j3,out=jmp);
+
+    Not(in=instruction[15],out=ainstr);
+    Or4Way(in[0]=dA,in[1]=dAM,in[2]=dAD,in[3]=dAMD,out=loadRegA0);
+    Or4Way(in[0]=dD,in[1]=dMD,in[2]=dAD,in[3]=dAMD,out=loadRegD);
+    Or(a=loadRegA0, b=ainstr, out=loadRegA);
+
+    ARegister(in=ALUOutOrInst, load=loadRegA, out=AregOut,out[0..14]=addressM);
+    DRegister(in=ALUoutput, load=loadRegD, out=DregOut);
+
+    Or10Way(in[0]=cM ,in[1]= cMminusD ,in[2]= cMplus1,in[3]= cMminus1 ,in[4]= cDminusM ,in[5]= cDplusM ,in[6]= cDandM ,in[7]= cDorM ,in[8]= cnotM ,in[9]= cnegM, out=selM);
+    Mux16(a=instruction, b=ALUoutput, sel=instruction[15], out=ALUOutOrInst);
+    Mux16(a=AregOut, b=inM, sel=selM, out=AregOrinM);
+
+    Or(a=cAplus1, b=cMplus1,out=cAMplus1);
+    Mux16(a=DregOut,b[1..15]=false,b[0]=true,sel=cAMplus1,out=OperandD);
+
+    Or(a=c1, b=cDplus1,out=c1Dplus1);
+    Mux16(a=AregOrinM,b[1..15]=false,b[0]=true,sel=c1Dplus1,out=OperandA);
+
+    Or4Way(in[0]=dM,in[1]=dMD,in[2]=dAM,in[3]=dAMD,out=writeM);
+    // Zero x
+    Or8Way(in[0]=c0 ,in[1]=c1 ,in[2]=cAminus1 ,in[3]=cnegA ,in[4]=cA ,in[5]=cM ,in[6]=cMminus1 ,in[7]=cnegM,out=izx0);
+    Or(a=cneg1, b=izx0,out=izx);
+    // Neg x
+    Or9Way(in[0]=cneg1 ,in[1]=cAminus1 ,in[2]=cMminus1 ,in[3]=cDminusM ,in[4]=cDorM ,in[5]=cDminusA ,in[6]=cDorA ,in[7]=cnotD ,in[8]=cnegA,out=inx);
+    // Zero y
+    Or3Way(in[0]=cnegD,in[1]=cD,in[2]=cDminus1,out=izy0);
+    Or(a=izy0, b=cneg1, out=izy);
+    // Neg y
+    Or8Way(in[0]=cAminusD ,in[1]=cMminusD ,in[2]=cDorA ,in[3]=cDorM ,in[4]=cnotA ,in[5]=cnotM ,in[6]=cnegD ,in[7]=cDminus1,out=iny);
+    // F
+    Or16Way(in[0]=cD ,in[1]=c1 ,in[2]=cneg1 ,in[3]=cDplus1 ,in[4]=cAplus1 ,in[5]=cMplus1 ,in[6]=cDplusA ,in[7]=cDplusM ,in[8]=cDminus1 ,in[9]=cDminusA ,in[10]=cDminusM ,in[11]=cAminusD ,in[12]=cMminusD ,in[13]=cnegD ,in[14]=cA ,in[15]=cM,out=inf0);
+    Or(a=inf0, b=cMminus1,out=inf);
+    Or10Way(in[0]=cDminusA ,in[1]=cDminusM ,in[2]=cAminusD ,in[3]=cMminusD ,in[5]= cDorA ,in[6]=cDorM ,in[7]=cnegD ,in[8]=cnegA ,in[9]=cnegM,out=inno);
+
+    ALU(x=OperandD, y=OperandA, 
+        zx=izx, 
+        nx=inx,
+        zy=izy,
+        ny=iny,
+        f =inf, 
+        no=inno,
+        out=outM,out=ALUoutput,
+        zr=zr,
+        ng=ng);
+
+    Not(in=zr, out=nzr);
+    Not(in=ng, out=psor0);
+    And(a=psor0, b=nzr, out=ps);
+
+    Or(a=zr,b=ps,out=zrps);
+    Or(a=zr,b=ng,out=zrng);
+
+    And(a=jgt, b=ps, out=gt);
+    And(a=jeq, b=zr, out=eq);
+    And(a=jge, b=zrps, out=ge);
+    And(a=jlt, b=ng, out=lt);
+    And(a=jne, b=nzr, out=ne);
+    And(a=jle, b=zrng, out=le);
+
+    Or6Way(a=gt,b=eq,c=ge,d=lt,e=ne,f=le,out=toload0);
+    Or(a=toload0, b=jmp,out=toload);
+    PC(in=AregOut, load=toload, inc=true, reset=reset,out[0..14]=pc);
+
+
+}
