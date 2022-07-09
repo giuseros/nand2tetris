@@ -25,13 +25,13 @@ D; JNE
 
 //(FILLW)
 @val
-M=0
+M=-1
 @FILL
 0; JMP
 
 (FILLB)
 @val
-M=-1
+M=0
 @FILL
 0; JMP
 

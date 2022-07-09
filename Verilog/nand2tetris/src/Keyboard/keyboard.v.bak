@@ -1,0 +1,72 @@
+module keyboard(
+input wire clock50, 
+input wire ps2_clk,
+input wire ps2_data,
+output wire ps2_code_new, 
+output reg[7:0] LED);
+
+parameter clock_freq = 50000000;
+          
+
+reg [1:0] sync_ffs;
+reg ps2_clk_int, ps2_clk_old;
+reg ps2_data_int;
+reg[10:0] ps2_word;
+reg [7:0] ps2_code_reg, ps2_code_reg_old;
+reg ps2_code_new_reg;
+wire error;
+reg [15:0]count_idle;
+reg [7:0] counter;
+
+
+always @(posedge clock50) begin
+	sync_ffs[0] <= ps2_clk;
+	sync_ffs[1] <= ps2_data;
+end
+
+// debounce ps2 clk
+debouncer debouncer1(.clk(clock50), .in(sync_ffs[0]), .result(ps2_clk_int));
+
+// debounce data clk
+debouncer debouncer2(.clk(clock50), .in(sync_ffs[1]), .result(ps2_data_int));
+
+initial begin
+counter<=0;
+end
+
+always @(posedge clock50) begin
+ps2_clk_old <= ps2_clk_int;
+end
+ 
+always @(posedge clock50) begin
+if (ps2_clk_int == 1'b0 && ps2_clk_old == 1'b1) begin
+	 counter <= counter+1;
+end
+end
+
+//assign error = !(!ps2_word[0] & ps2_word[10] & (^ps2_word[9:1]));
+
+//always @(posedge clock50) begin
+//if (counter == 11) begin
+//ps2_code_new_reg <= 1;
+//ps2_code_reg <= counter;
+//end
+//// if (ps2_clk_int == 0)
+////     count_idle <= 0;
+//// else if (count_idle != 2777)
+////     count_idle <= count_idle+1;
+////
+////  if (count_idle == 2777) begin
+////     ps2_code_new_reg <= 1;
+////	  ps2_code_reg <= ps2_word[8:1];
+////   end else begin
+////	  ps2_code_new_reg <= 0;
+////	  ps2_code_reg <= 0;
+////	end
+//end
+//
+assign LED = counter;
+assign ps2_code_new = ps2_code_new_reg;	
+     
+
+endmodule
