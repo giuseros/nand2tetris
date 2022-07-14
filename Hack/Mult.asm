@@ -10,6 +10,16 @@
 // R0 >= 0, R1 >= 0, and R0*R1 < 32768.
 
 // Put your code here.
+
+@3
+D=A
+
+@R0
+M=D
+
+@R1
+M=D
+
 @i
 M=0
 
@@ -24,20 +34,24 @@ D=M
 @R1
 D = D-M
 
-@END
+@END1
 D; JGE
 
 @R0
 D=M
 
 @R2
-M=M+D
+M=D+M
 
 @i
 M=M+1
 
 @LOOP
 0; JMP
+
+(END1)
+@R2
+D=M
 
 
 (END)

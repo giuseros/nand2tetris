@@ -16,10 +16,10 @@ reg [ADDR-1:0] addr_reg;
 reg [ADDR-1:0] pc, last_pc;
 
 initial begin
-	$readmemb("binaries/Fill.bin", mem);
-	addr_reg <= 0;
-	pc <= 0;
-	a_dout <= 0;
+	$readmemb("C:/Users/g00621769/repos/nand2tetris/Verilog/nand2tetris/src/Memory/binaries/Mult.bin", mem);
+	addr_reg = 0;
+	pc = 0;
+	a_dout = 0;
 end
  
 // Port A

@@ -76,6 +76,12 @@ wire [15:0] inM;
 wire [7:0] data_keyboard;
 wire [15:0] data_ram_out;
 
+wire [15:0] regA;
+wire [15:0] regD;
+wire [15:0] regToDisplay;
+
+assign regToDisplay = (SW == 10'h0 ? 0 : (SW == 10'h1 ? regD : regA));
+
 
 arbitrator arbitrator(.address_in(addressM), 
                       .write_in(writeM),
@@ -157,13 +163,20 @@ CPU CPU(.instruction(instruction_wire),
 		  .addressI(addressI),
 		  .loadPC(loadPC),
 		  .stall(stall),
-		  .clk(clk));
+		  .clk(clk),
+		  .A(regA),
+		  .D(regD));
 
 
 keyboard keboard(.clk(clk), .ps2_clk(ps2_clk), .ps2_data(ps2_data), .out(key_pressed));
 
-segment_display segment_display1(HEX0, key_pressed[3:0]);
-segment_display segment_display2(HEX1, key_pressed[7:4]);
+segment_display segment_display0(HEX0, key_pressed[3:0]);
+segment_display segment_display1(HEX1, key_pressed[7:4]);
+
+segment_display segment_display2(HEX2, regToDisplay[3:0]);
+segment_display segment_display3(HEX3, regToDisplay[7:4]);
+segment_display segment_display4(HEX4, regToDisplay[11:8]);
+segment_display segment_display5(HEX5, regToDisplay[15:12]);
 
 
 endmodule

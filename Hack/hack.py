@@ -212,7 +212,6 @@ def main(fname):
     init_symbol_table()
     program_no_L = populate_symbol_table(program)
         
-    
     for instr in program_no_L:
         print(code(parse(instr)))
         

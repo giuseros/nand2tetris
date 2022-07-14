@@ -9,9 +9,21 @@ module single_port_ram #(
     input   wire    [DATA-1:0]  a_din,
     output  reg     [DATA-1:0]  a_dout
 );
+integer i;
+
+
+
+
  
 // Shared memory
 reg [DATA-1:0] mem [(2**ADDR)-1:0];
+
+// Use this only for simulation (it will slow down compilation)
+//initial begin
+//	for (i=0;i<(2**ADDR)-1;i=i+1)begin
+//		mem[i] = 0;
+//	end
+//end
 
  
 // Port A

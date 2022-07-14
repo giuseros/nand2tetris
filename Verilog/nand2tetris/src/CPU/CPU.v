@@ -6,10 +6,9 @@ output wire [14:0] addressM,
 output wire [14:0] addressI,
 output wire loadPC,
 output wire writeM,
-output wire stall);
-
-reg[15:0] D;
-reg[15:0] A;
+output wire stall,
+output reg signed[15:0] D,
+output reg signed[15:0] A);
 
 initial begin
 	D <= 0;
@@ -20,9 +19,9 @@ end
 wire loadRegA, loadRegD, selM, selA, AMplus1, const1OrDplus1, izx, inx, izy, iny, inf, inno, jgt, jge, jlt, jne, jle, jmp;
 
 // ALU operands
-wire [15:0] operandA, operandD;
+wire signed [15:0] operandA, operandD;
 // ALU output
-wire [15:0] ALUout;
+wire signed [15:0] ALUout;
 // ALU output flags
 wire ozr, ong;
 
@@ -71,20 +70,27 @@ ALU ALU(
 	  .ng(ong));
 
 reg state;
+reg state2;
+reg state3;
 
 initial begin
-state <= 0;
+state <= 0; // for writem
+state2 <= 0; // for loadD
+state3 <= 0; // for loadA
 end
 
 assign writeM = (stall & tmpWriteM) ? state : tmpWriteM;
 
 always @(posedge clk) begin
-	if (loadRegA)
+	if (loadRegA && (state3 || !stall))
 	    A <= (selA==0) ? instruction : ALUout;
-	if (loadRegD)
+		 
+	if (loadRegD && (state2 || !stall))
 	    D <= ALUout;
 	
 	state <= (stall & tmpWriteM) ? ~state : 0;
+	state2 <= (stall & loadRegD) ? ~state2 : 0;
+	state3 <= (stall & loadRegA) ? ~state3 : 0;
 end
 
 assign operandD = AMplus1 ? 1'b1 : D;

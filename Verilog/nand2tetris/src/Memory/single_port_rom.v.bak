@@ -16,10 +16,10 @@ reg [ADDR-1:0] addr_reg;
 reg [ADDR-1:0] pc, last_pc;
 
 initial begin
-	$readmemb("C:/AlteraPrj/de10nano_vgaHdmi_chip/quartus/src/cpu/mem.txt", mem);
-//	addr_reg <= 0;
-//	pc <= 0;
-//	a_dout <= 0;
+	$readmemb("C://Users//\repos\nand2tetris\Verilog\nand2tetris\src\Memory\binaries\Mult.bin", mem);
+	addr_reg = 0;
+	pc = 0;
+	a_dout = 0;
 end
  
 // Port A
@@ -35,11 +35,6 @@ always @(posedge a_clk) begin
 	   a_dout <= mem[pc];
 		pc <= pc+1;
 	 end
-	   
-////    a_dout      <= jmp ? mem[a_addr] : (stall? mem[last_pc] : mem[pc]);
-////	 pc          <= jmp ? a_addr+1 : (stall ? last_pc+1 : pc+1);
-//	 pc <= pc +1;
-//	 a_dout <= mem[pc];
 end
  
 endmodule
