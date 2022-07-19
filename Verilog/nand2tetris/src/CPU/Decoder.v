@@ -122,11 +122,11 @@ assign selA = I[15];
 	// for negK simply set x->0 and y->K
 	 
 	// ALU control signals
-	assign izx = const0 | const1 | Aminus1 | negA | A | M | Mminus1 | negM | constNeg1;
-	assign inx = constNeg1 | Aminus1 | Mminus1 | DminusM | DorM | DminusA | DorA | notD | negA;
+	assign izx = const0 | const1 | Aminus1 | negA | A | M | Mminus1 | negM | constNeg1 | notM;
+	assign inx = constNeg1 | Aminus1 | Mminus1 | DminusM | DorM | DminusA | DorA | notD | negA | negM;
 	assign izy = const0 | negD | D | Dminus1 | constNeg1 | notD;
 	assign iny = AminusD | MminusD | DorA | DorM | notA | notM | negD | Dminus1;
-	assign inf = AminusD | D | const1 | constNeg1 | Dplus1 | Aplus1 | Aminus1 | Mplus1 | DplusA | DplusM | Dminus1 | DminusA | DminusM | MminusD | negD | notD | negA | A | M | Mminus1;
+	assign inf = negM | notM | AminusD | D | const1 | constNeg1 | Dplus1 | Aplus1 | Aminus1 | Mplus1 | DplusA | DplusM | Dminus1 | DminusA | DminusM | MminusD | negD | notD | negA | A | M | Mminus1;
 	assign inno = DminusA | DminusM | AminusD | MminusD | DorA | DorM | negD | negA | negM; 
 	
    // Should we enable write?	

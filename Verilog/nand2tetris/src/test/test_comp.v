@@ -1,9 +1,6 @@
 `timescale 1ns/1ns
 
-module CPU_tb;
-
-reg[1000*8:0] PRG;
-
+module test_comp;
 reg clk, reset;
 
 wire signed [15:0] regD;
@@ -29,7 +26,7 @@ single_port_ram cpu_ram(.a_clk(clk),
 						  .a_din(data_in), 
 						  .a_dout(data_out));
 						 
-CPU dut(.instruction(instruction), 
+CPU CPU(.instruction(instruction), 
         .clk(clk), .reset(0), .stall(stall),
 		  .writeM(writeM),
 		  .outM(data_in),
@@ -48,7 +45,6 @@ always
 #1 clk = ~clk;
 
 initial begin
-PRG = "C:/Users/g00621769/repos/nand2tetris/Verilog/nand2tetris/src/test/test_comp.bin";
 
 clk = 1'b0;
 i = 0;

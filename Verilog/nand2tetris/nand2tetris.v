@@ -145,7 +145,7 @@ wire [15:0] instruction_wire;
 wire [14:0] addressI;
 wire loadPC, stall;
 
-single_port_rom #(.PRG="C:/Users/g00621769/repos/nand2tetris/Verilog/nand2tetris/src/Memory/binaries/Mult.bin") rom(.a_dout(instruction_wire), 
+single_port_rom #(.PRG("C:/Users/g00621769/repos/nand2tetris/Verilog/nand2tetris/src/Memory/binaries/Mult.bin")) rom(.a_dout(instruction_wire), 
                     .a_addr(addressI), 
 						  .a_clk(clk),
 						  .stall(stall),
