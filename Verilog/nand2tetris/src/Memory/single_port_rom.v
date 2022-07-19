@@ -1,6 +1,7 @@
 module single_port_rom #(
     parameter DATA = 16,
-    parameter ADDR = 15
+    parameter ADDR = 15, 
+	 parameter PRG = ""
 ) (
     // Port A
     input   wire                a_clk,
@@ -16,7 +17,7 @@ reg [ADDR-1:0] addr_reg;
 reg [ADDR-1:0] pc, last_pc;
 
 initial begin
-	$readmemb("C:/Users/g00621769/repos/nand2tetris/Verilog/nand2tetris/src/Memory/binaries/Mult.bin", mem);
+	$readmemb(PRG, mem);
 	addr_reg = 0;
 	pc = 0;
 	a_dout = 0;

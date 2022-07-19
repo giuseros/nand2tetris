@@ -3,7 +3,7 @@ input[15:0] I,
 output loadRegA, 
        loadRegD,
 		 selM, selA,
-		 AMplus1, const1OrDplus1, memread,
+		 AMplus1, setOperandDTo1, memread,
 		 izx, inx, izy, iny, inf, inno, 
 		 jgt, jge, jlt, jne, jle, jmp, jeq, writeM);
 
@@ -96,7 +96,7 @@ assign selA = I[15];
 	assign dAD = I[15] & d1 & d2 & !d3;
 	assign dAMD = I[15] & d1 & d2 & d3;
 		 
-	 // Decode jump
+	// Decode jump
 	//assign jnull = I[15] & !j1 & !j2 & !j3;
 	assign jgt = I[15] & !j1 & !j2 & j3;
 	assign jeq = I[15] & !j1 & j2 & !j3;
@@ -106,21 +106,27 @@ assign selA = I[15];
 	assign jle = I[15] & j1 & j2 & !j3;
 	assign jmp = I[15] & j1 & j2 & j3;
 	 
-	 // Flip-flop control signals
+	// Flip-flop control signals
 	assign loadRegA = dA | dAM | dAD | dAMD | !I[15];
 	assign loadRegD = dD | dMD | dAD | dAMD;
 	 
-	 // Muxes constrol signals
+	// Muxes constrol signals
 	assign selM = M | MminusD | Mplus1 | Mminus1 | DminusM | DplusM | DandM | DorM | notM | negM;
 	assign AMplus1 = Aplus1 | Mplus1;
-	assign const1OrDplus1 = const1 | Dplus1;
+	assign setOperandDTo1 = const1 | Dplus1;
+	
+	// Subtraction (x-y)
+	// x_1 = -x -1 -- one's complement
+	// x_2 = -x -- two's complement
+	// x - y = (x_1 +y)_1 = (-x -1 + y)_1 = -(-x-1+y) -1 = x+1-y -1 = x-y
+	// for negK simply set x->0 and y->K
 	 
-	 // ALU control signals
+	// ALU control signals
 	assign izx = const0 | const1 | Aminus1 | negA | A | M | Mminus1 | negM | constNeg1;
 	assign inx = constNeg1 | Aminus1 | Mminus1 | DminusM | DorM | DminusA | DorA | notD | negA;
-	assign izy = const0 | negD | D | Dminus1 | constNeg1;
+	assign izy = const0 | negD | D | Dminus1 | constNeg1 | notD;
 	assign iny = AminusD | MminusD | DorA | DorM | notA | notM | negD | Dminus1;
-	assign inf = D | const1 | constNeg1 | Dplus1 | Aplus1 | Mplus1 | DplusA | DplusM | Dminus1 | DminusA | DminusM | MminusD | negD | A | M | Mminus1;
+	assign inf = AminusD | D | const1 | constNeg1 | Dplus1 | Aplus1 | Aminus1 | Mplus1 | DplusA | DplusM | Dminus1 | DminusA | DminusM | MminusD | negD | notD | negA | A | M | Mminus1;
 	assign inno = DminusA | DminusM | AminusD | MminusD | DorA | DorM | negD | negA | negM; 
 	
    // Should we enable write?	

@@ -16,7 +16,7 @@ initial begin
 end
 
 // Control signals
-wire loadRegA, loadRegD, selM, selA, AMplus1, const1OrDplus1, izx, inx, izy, iny, inf, inno, jgt, jge, jlt, jne, jle, jmp;
+wire loadRegA, loadRegD, selM, selA, AMplus1, setOperandDTo1, izx, inx, izy, iny, inf, inno, jgt, jge, jlt, jne, jle, jmp;
 
 // ALU operands
 wire signed [15:0] operandA, operandD;
@@ -36,7 +36,7 @@ Decoder Decoder (
   .selM(selM),
   .selA(selA),
   .AMplus1(AMplus1), 
-  .const1OrDplus1(const1OrDplus1),
+  .setOperandDTo1(setOperandDTo1),
   .izx(izx),
   .inx(inx),
   .izy(izy),
@@ -95,7 +95,7 @@ end
 
 assign operandD = AMplus1 ? 1'b1 : D;
 assign outM = ALUout;
-assign operandA = const1OrDplus1 ? 1 : selM ? inM : A;
+assign operandA = setOperandDTo1 ? 1 : selM ? inM : A;
 
 // outputs 
 assign addressM = A[14:0];

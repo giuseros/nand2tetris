@@ -29,7 +29,7 @@ end
 
 // 25Mhz clock
 always @(posedge clk) begin
-clk_vga <= !clk_vga;
+	clk_vga <= !clk_vga;
 end
 
 
@@ -53,7 +53,6 @@ if (hcount >= 656 && hcount < 752)
 	hsync <= 1'b0;
 else
 	hsync <= 1'b1;
-
 	
 end
 
@@ -64,10 +63,6 @@ always @(posedge clk_vga) begin
 		G <= {4{data_pixel[hcount % 16]}};
 		B <= {4{data_pixel[hcount % 16]}};
 
-//	   R <= 8'hFF;
-//		G <= 8'hFF;
-//		B <= 8'hFF;
-//		
 		bit_count <= bit_count+1;
 		if (bit_count == 15) begin
 			address_pixel <= (address_pixel + 1) % 8192;
@@ -79,10 +74,5 @@ always @(posedge clk_vga) begin
 		B<=4'b0000;
 	end
 end
-
-//// read from vga memory
-//always @(posedge pclk) begin
-//
-//end
     
 endmodule

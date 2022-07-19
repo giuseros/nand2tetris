@@ -97,7 +97,7 @@ def decode_comp(comp):
     if comp == '!A':
         return '0110001'
     if comp == '-D':
-        return '001111'
+        return '0001111'
     if comp == '-A':
         return '0110011'
     if comp == 'D+1':
