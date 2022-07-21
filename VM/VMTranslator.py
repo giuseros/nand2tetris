@@ -107,7 +107,7 @@ def write_push(segment, val, workspace):
         print("@"+val)
         print("D=A")
         print("@" + segment_pointer(segment))
-        print("A=M+D")
+        print("A=D+M")
         print("D=M")
         stack_push()
     elif segment == "static":
@@ -118,7 +118,7 @@ def write_push(segment, val, workspace):
         print("@"+val)
         print("D=A")
         print("@5")
-        print("A=A+D")
+        print("A=D+A")
         print("D=M")
         stack_push()
     elif segment == "pointer":
@@ -189,7 +189,7 @@ def write_arith(cmd):
     print("@SP")
     print("A=M-1")
     if cmd=="add":
-        print("M=M+D")
+        print("M=D+M")
     elif cmd=="sub":
         print("M=M-D")
     elif cmd == "and":
