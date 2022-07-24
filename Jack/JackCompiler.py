@@ -387,7 +387,7 @@ class CompileEngine:
 
         if tok in ["int", "char", "boolean"] or typ == "identifier":
             name  = self.varName()
-            self.subroutineSymbolTable[name] = (typ, "argument", arg_cnt)
+            self.subroutineSymbolTable[name] = (tok, "argument", arg_cnt)
             arg_cnt += 1
 
             tok,typ = self.advance()

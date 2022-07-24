@@ -193,9 +193,9 @@ def write_arith(cmd):
     elif cmd=="sub":
         print("M=M-D")
     elif cmd == "and":
-        print("M=M&D")
+        print("M=D&M")
     elif cmd == "or":
-        print("M=M|D")
+        print("M=D|M")
     else:
         jmp = gen_label()
         end = gen_label()
