@@ -95,7 +95,7 @@ end
 
 assign operandD = AMplus1 ? 1'b1 : D;
 assign outM = ALUout;
-assign operandA = setOperandDTo1 ? 1 : selM ? inM : A;
+assign operandA = (setOperandDTo1 ? 15'h1 : (selM ? inM : A));
 
 // outputs 
 assign addressM = A[14:0];

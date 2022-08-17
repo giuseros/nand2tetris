@@ -5,7 +5,7 @@ input reset,
 input [15:0] data_pixel, 
 
 // Output to the VGA
-output reg [13:0] address_pixel,
+output reg [14:0] address_pixel,
 output reg clk_vga,
 output reg hsync, 
 output reg vsync, 
@@ -24,6 +24,8 @@ initial begin
   hcount     = 0;
   vcount     = 0;
   bit_count   = 0;
+  clk_vga = 0;
+  address_pixel =0;
 end
 
 
@@ -44,12 +46,12 @@ if(hcount==799) begin
 end else 
 	hcount <= hcount+1;
 
-if  (vcount >= 490 && vcount < 492)
+if  (vcount >= 489 && vcount < 491)
 	vsync <= 1'b0;
 else
 	vsync <= 1'b1;
 	
-if (hcount >= 656 && hcount < 752)
+if (hcount >= 655 && hcount < 751)
 	hsync <= 1'b0;
 else
 	hsync <= 1'b1;
@@ -64,7 +66,8 @@ always @(posedge clk_vga) begin
 		B <= {4{data_pixel[hcount % 16]}};
 
 		bit_count <= bit_count+1;
-		if (bit_count == 15) begin
+		
+		if (bit_count == 13) begin
 			address_pixel <= (address_pixel + 1) % 8192;
 		end
 		

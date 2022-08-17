@@ -8,34 +8,37 @@ module single_port_rom #(
 	 input   wire jmp,
 	 input 	wire stall,
     input   wire    [ADDR-1:0]  a_addr,
-    output  reg     [DATA-1:0]  a_dout
+    output  wire     [DATA-1:0]  a_dout
 );
- 
-// Shared memory
-reg [DATA-1:0] mem [(2**ADDR)-1:0];
-reg [ADDR-1:0] addr_reg;
+
+wire [ADDR-1:0] torom;
+wire stalling;
 reg [ADDR-1:0] pc, last_pc;
+reg stop_stall;
+
+// Shared memory (we use altera syntetizable memory)
+onchip_rom  #(.PRG(PRG)) ROM (.address(torom), .clock(a_clk), .q(a_dout));
 
 initial begin
-	$readmemb(PRG, mem);
-	addr_reg = 0;
 	pc = 0;
-	a_dout = 0;
+	stop_stall=0;
 end
- 
-// Port A
+
+// Sequential logic to handle the program counter
 always @(posedge a_clk) begin
 	 last_pc     <= pc;
 	 if (jmp) begin
-		a_dout <= mem[a_addr];
 		pc <= a_addr + 1;
-	 end else if (stall) begin
-	   a_dout <= mem[last_pc];
-		pc <= last_pc +1;
-	 end else begin
-	   a_dout <= mem[pc];
+	 end else if (~stall | (stall & stop_stall) ) begin
+		stop_stall <= 0;
 		pc <= pc+1;
+	 end else if (~stop_stall) begin
+		stop_stall <= 1;
 	 end
 end
+
+// Combinatorial logic to handl the address to send to the ROM
+assign stallig = stall & (~stop_stall);
+assign torom = (stallig? last_pc : (jmp ? a_addr : pc));
  
 endmodule

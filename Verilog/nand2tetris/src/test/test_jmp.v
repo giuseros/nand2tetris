@@ -1,6 +1,6 @@
-`timescale 1ns/1ns
+`timescale 1ps/1ps
 
-module test_jmp;
+module test_jmp(input wire dummy);
 reg clk, reset;
 
 wire signed [15:0] regD;
@@ -13,7 +13,7 @@ wire [15:0] instruction;
 wire [14:0] addressI;
 wire loadPC, stall;
 
-single_port_rom #(.PRG("C:/Users/g00621769/repos/nand2tetris/Verilog/nand2tetris/src/test/test_jmp.bin")) rom(.a_dout(instruction), 
+single_port_rom #(.PRG("/mnt/data/nand2tetris/Verilog/nand2tetris/src/test/test_jmp.mif")) rom(.a_dout(instruction), 
                     .a_addr(addressI), 
 						  .a_clk(clk),
 						  .stall(stall),
@@ -51,9 +51,9 @@ regDExpected = -10;
 
 # 200
 if (regD != regDExpected) 
-	$display("[ERROR AT %t]! expected: %d, actual: %d", $time, regDExpected, regD);
+	$display("[ERROR AT %t]! expected: %d, actual: %d", 0, regDExpected, regD);
 else
-	$display("[%t OK] expected: %d, actual: %d", $time, regDExpected, regD);
+	$display("[%t OK] expected: %d, actual: %d", 0, regDExpected, regD);
 
 end
 

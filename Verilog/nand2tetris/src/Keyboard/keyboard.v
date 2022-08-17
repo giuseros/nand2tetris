@@ -33,7 +33,7 @@ debouncer debouncer2(.clk(clk), .in(sync_ffs[1]), .result(ps2_data_int));
  
 always @(posedge clk) begin
 if (ps2_clk_int == 1'b0 && ps2_clk_old == 1'b1) begin
-	 counter <= counter+1;
+	 counter <= counter+8'h1;
 	 ps2_word <= {ps2_data_int, ps2_word[10:1]};
 end
 

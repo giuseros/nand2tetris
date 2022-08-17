@@ -1,4 +1,4 @@
-`timescale 1ns/1ns
+`timescale 1ps/1ps
 
 module FibonacciSeries;
 reg clk, reset;
@@ -25,7 +25,7 @@ else
 end
 endtask
 
-single_port_rom #(.PRG("C:/Users/g00621769/repos/nand2tetris/Verilog/nand2tetris/src/test/FibonacciSeries.bin")) rom(.a_dout(instruction), 
+single_port_rom #(.PRG("/mnt/data/nand2tetris/Verilog/nand2tetris/src/test/FibonacciSeries.mif")) rom(.a_dout(instruction), 
                     .a_addr(addressI), 
 						  .a_clk(clk),
 						  .stall(stall),

@@ -27,7 +27,7 @@ assign j1 = I[2];
 assign j2 = I[1];
 assign j3 = I[0];
 
-assign memread = a;
+assign memread = a & I[15];
 
 assign selA = I[15];
 
@@ -56,24 +56,24 @@ assign selA = I[15];
     /*0,1,0,1,0,1*/ assign row17 = !c1 & c2 & !c3 & c4 & !c5 & c6;
 	 
 	 
-	assign const0 = row0 & !a;
-	assign const1 = row1 & !a;
-	assign constNeg1 = row2 & !a;
-	assign D = row3 & !a;
-	assign A = row4 & !a;
-	assign notD = row5 & !a;
-	assign notA = row6 & !a;
-	assign negD = row7 & !a;
-	assign negA = row8 & !a;
-	assign Dplus1 = row9 & !a;
-	assign Aplus1 = row10 & !a;
-	assign Dminus1 = row11 & !a;
-	assign Aminus1 = row12 & !a;
-	assign DplusA = row13 & !a;
-	assign DminusA = row14 & !a;
-	assign AminusD = row15 & !a;
-	assign DandA = row16 & !a;
-	assign DorA = row17 & !a;
+	assign const0 = I[15] & row0 & !a;
+	assign const1 = I[15] &row1 & !a;
+	assign constNeg1 = I[15] &row2 & !a;
+	assign D = I[15] &row3 & !a;
+	assign A = I[15] &row4 & !a;
+	assign notD = I[15] &row5 & !a;
+	assign notA = I[15] &row6 & !a;
+	assign negD = I[15] &row7 & !a;
+	assign negA = I[15] &row8 & !a;
+	assign Dplus1 = I[15] &row9 & !a;
+	assign Aplus1 = I[15] &row10 & !a;
+	assign Dminus1 = I[15] &row11 & !a;
+	assign Aminus1 = I[15] &row12 & !a;
+	assign DplusA = I[15] &row13 & !a;
+	assign DminusA = I[15] &row14 & !a;
+	assign AminusD = I[15] &row15 & !a;
+	assign DandA = I[15] &row16 & !a;
+	assign DorA = I[15] &row17 & !a;
 	 
 	assign M = I[15] & row4 & a;
 	assign notM = I[15] & row6 & a;
