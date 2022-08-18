@@ -1,0 +1,17 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/09/HelloWorld/Main.jack
+
+/** Test shapes. */
+class Main {
+   function void main() {
+      /* Prints some text using the standard library. */
+      do Screen.drawLine(0, 0, 50, 50);
+      do Screen.drawRectangle(50, 50, 100, 100);
+      do Screen.drawCircle(200, 200, 10);
+      do Screen.drawLine(0, 0, 511, 255);
+      do Screen.drawLine(511, 0, 0, 255);
+      return;
+   }
+}
