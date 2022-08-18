@@ -1,23 +1,22 @@
 module single_port_rom #(
-    parameter DATA = 16,
-    parameter ADDR = 15, 
 	 parameter PRG = ""
 ) (
     // Port A
     input   wire                a_clk,
 	 input   wire jmp,
 	 input 	wire stall,
-    input   wire    [ADDR-1:0]  a_addr,
-    output  wire     [DATA-1:0]  a_dout
+    input   wire    [14:0]  a_addr,
+    output  wire     [15:0]  a_dout
 );
 
-wire [ADDR-1:0] torom;
+wire [14:0] torom;
+wire [15:0] torom16;
 wire stalling;
-reg [ADDR-1:0] pc, last_pc;
+reg [14:0] pc, last_pc;
 reg stop_stall;
 
 // Shared memory (we use altera syntetizable memory)
-onchip_rom  #(.PRG(PRG)) ROM (.address(torom), .clock(a_clk), .q(a_dout));
+onchip_rom  #(.PRG(PRG)) ROM (.address(torom16), .clock(a_clk), .q(a_dout));
 
 initial begin
 	pc = 0;
@@ -40,5 +39,6 @@ end
 // Combinatorial logic to handl the address to send to the ROM
 assign stallig = stall & (~stop_stall);
 assign torom = (stallig? last_pc : (jmp ? a_addr : pc));
+assign torom16 = {1'b0, torom};
  
 endmodule

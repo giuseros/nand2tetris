@@ -1,23 +1,20 @@
-module single_port_ram #(
-    parameter DATA = 16,
-    parameter ADDR = 15
-) (
+module single_port_ram (
     // Port A
     input   wire                a_clk,
     input   wire                a_wr,
-    input   wire    [ADDR-1:0]  a_addr,
-    input   wire    [DATA-1:0]  a_din,
-    output  reg     [DATA-1:0]  a_dout
+    input   wire    [14:0]  a_addr,
+    input   wire    [15:0]  a_din,
+    output  reg     [15:0]  a_dout
 );
 
 // Shared memory
-reg [DATA-1:0] mem [(2**ADDR)-1:0];
+reg [15:0] mem [(2**15)-1:0];
 
 
 // Use this only for simulation (it will slow down compilation)
 //integer i;
 //initial begin
-//	for (i=0;i<(2**ADDR)-1;i=i+1)begin
+//	for (i=0;i<(2**15)-1;i=i+1)begin
 //		mem[i] = 0;
 //	end
 //end

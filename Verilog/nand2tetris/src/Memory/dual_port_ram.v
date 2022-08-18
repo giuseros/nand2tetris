@@ -1,24 +1,21 @@
-module dual_port_ram #(
-    parameter DATA = 16,
-    parameter ADDR = 15
-) (
+module dual_port_ram (
     // Port A
-    input   wire                a_clk,
-    input   wire                a_wr,
-    input   wire    [ADDR-1:0]  a_addr,
-    input   wire    [DATA-1:0]  a_din,
-    output  reg     [DATA-1:0]  a_dout,
+    input   wire            a_clk,
+    input   wire            a_wr,
+    input   wire    [14:0]  a_addr,
+    input   wire    [15:0]  a_din,
+    output  reg     [15:0]  a_dout,
      
     // Port B
-    input   wire                b_clk,
-    input   wire                b_wr,
-    input   wire    [ADDR-1:0]  b_addr,
-    input   wire    [DATA-1:0]  b_din,
-    output  reg     [DATA-1:0]  b_dout
+    input   wire            b_clk,
+    input   wire            b_wr,
+    input   wire    [14:0]  b_addr,
+    input   wire    [15:0]  b_din,
+    output  reg     [15:0]  b_dout
 );
  
 // Shared memory
-reg [DATA-1:0] mem [8192-1:0];
+reg [15:0] mem [8192-1:0];
 
 // Use this only for simulation (it will slow down compilation)
 //integer i;

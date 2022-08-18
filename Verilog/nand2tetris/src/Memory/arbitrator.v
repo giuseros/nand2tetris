@@ -1,31 +1,28 @@
-module arbitrator #(
-    parameter DATA = 16,
-    parameter ADDR = 15
-) (
+module arbitrator(
     // Input memory data (to write)
-    input   wire    [ADDR-1:0]  address_in,
-	 input  wire    [DATA-1:0] data_in,
+    input   wire    [14:0]  address_in,
+	 input  wire    [15:0] data_in,
 	 input  wire    write_in,
 	 
 	 // Input memory data (to read)
-	 input wire [DATA-1:0] data_from_keyboard,
-	 input wire [DATA-1:0] data_from_ram,	
-	 input wire [DATA-1:0] data_from_video,
+	 input wire [15:0] data_from_keyboard,
+	 input wire [15:0] data_from_ram,	
+	 input wire [15:0] data_from_video,
     
 	 // Route to screen
-	 output   wire    [ADDR-1:0]  address_screen,
-	 output   wire    [DATA-1:0] data_screen,
+	 output   wire    [14:0]  address_screen,
+	 output   wire    [15:0] data_screen,
     output   wire    write_screen,
 	 
 	 // Route to ram
-	 output   wire    [ADDR-1:0]  address_ram,
-	 output   wire    [DATA-1:0] data_ram,
+	 output   wire    [14:0]  address_ram,
+	 output   wire    [15:0] data_ram,
     output   wire    write_ram,
 	 
 	 // Data read
-	 output wire [DATA-1:0] data_out
+	 output wire [15:0] data_out
 );
-wire [DATA-1:0] tmp;
+wire [15:0] tmp;
 
 assign address_ram = address_in < 16384 ? address_in : 15'h0;
 assign data_ram = address_in < 16384 ? data_in : 16'h0;
