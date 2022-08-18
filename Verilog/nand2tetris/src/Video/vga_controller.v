@@ -67,7 +67,7 @@ always @(posedge clk_vga) begin
 
 		bit_count <= bit_count+1;
 		
-		if (bit_count == 13) begin
+		if (bit_count == 14) begin
 			address_pixel <= (address_pixel + 1) % 8192;
 		end
 		
