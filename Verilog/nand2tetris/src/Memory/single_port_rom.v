@@ -3,11 +3,12 @@ module single_port_rom #(
 	 parameter IL = 16
 ) (
     // Port A
-    input   wire                a_clk,
+    input   wire a_clk,
 	 input   wire jmp,
 	 input 	wire stall,
-    input   wire    [IL-2:0]  a_addr,
-    output  wire    [IL-1:0]  a_dout
+	 input   wire rst,
+    input   wire [IL-2:0]  a_addr,
+    output  wire [IL-1:0]  a_dout
 );
 
 wire [15:0] torom_ext; // The onchip rom is 64K large (i.e., 16 bit address)
@@ -30,7 +31,7 @@ end
 // Sequential logic to handle the program counter
 always @(posedge a_clk) begin
 	 last_pc     <= pc;
-	 if (jmp) begin
+    if (jmp) begin
 		pc <= a_addr + one;
 	 end else if (~stall | (stall & stop_stall) ) begin
 		stop_stall <= 0;
