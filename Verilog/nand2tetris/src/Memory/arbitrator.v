@@ -24,16 +24,16 @@ module arbitrator(
 );
 wire [15:0] tmp;
 
-assign address_ram = address_in < 16384 ? address_in : 15'h0;
-assign data_ram = address_in < 16384 ? data_in : 16'h0;
-assign write_ram = address_in < 16384 ? write_in : 1'h0;
+assign address_ram = (address_in < 16384) ? address_in : 15'h0;
+assign data_ram = (address_in < 16384) ? data_in : 16'h0;
+assign write_ram = (address_in < 16384) ? write_in : 1'h0;
 
-assign address_screen = address_in >= 16384 && address_in < 24576? address_in-16384 : 15'h0;
-assign data_screen = address_in >= 16384 && address_in < 24576 ? data_in : 16'h0;
-assign write_screen = address_in >= 16384 && address_in < 24576 ? write_in : 1'h0;
+assign address_screen = (address_in >= 16384 && address_in < 24576) ? (address_in[13:0]) : 15'h0;
+assign data_screen = (address_in >= 16384 && address_in < 24576) ? data_in : 16'h0;
+assign write_screen = (address_in >= 16384 && address_in < 24576) ? write_in : 1'h0;
 
-assign tmp = address_in < 16384 ? data_from_ram : data_from_video;
-assign data_out = address_in == 24576 ? data_from_keyboard : tmp;
+assign tmp = (address_in < 16384) ? data_from_ram : data_from_video;
+assign data_out = (address_in == 24576) ? data_from_keyboard : tmp;
 
 endmodule
  

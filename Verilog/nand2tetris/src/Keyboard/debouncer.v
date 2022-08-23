@@ -18,7 +18,7 @@ flipflops[1] <= flipflops[0];
 if (counter_set) 
 	counter_out <= 0;
 else if (counter_out[8] == 0)
-   counter_out <= counter_out +1;
+   counter_out <= counter_out +9'h1;
 else
    result <= flipflops[1];
 

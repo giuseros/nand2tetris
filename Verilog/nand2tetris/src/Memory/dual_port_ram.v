@@ -20,11 +20,11 @@ reg [15:0] mem [8192-1:0];
 // Use this only for simulation (it will slow down compilation)
 //integer i;
 //initial begin
-//	for (i=0;i<(2**ADDR)-1;i=i+1)begin
+//	for (i=0;i<(2**15)-1;i=i+1)begin
 //		mem[i] = 0;
 //	end
 //end
- 
+// 
 // Port A
 always @(posedge a_clk) begin
     a_dout      <= mem[a_addr];

@@ -1,22 +1,26 @@
 module single_port_rom #(
-	 parameter PRG = ""
+	 parameter PRG = "",
+	 parameter IL = 16
 ) (
     // Port A
     input   wire                a_clk,
 	 input   wire jmp,
 	 input 	wire stall,
-    input   wire    [14:0]  a_addr,
-    output  wire     [15:0]  a_dout
+    input   wire    [IL-2:0]  a_addr,
+    output  wire    [IL-1:0]  a_dout
 );
 
-wire [14:0] torom;
-wire [15:0] torom16;
+wire [15:0] torom_ext; // The onchip rom is 64K large (i.e., 16 bit address)
+
+wire [IL-2:0] torom;
 wire stalling;
-reg [14:0] pc, last_pc;
+reg [IL-2:0] pc, last_pc;
 reg stop_stall;
 
+wire [IL-2:0] one  = {{IL-3{1'b0}}, 1'b1};
+
 // Shared memory (we use altera syntetizable memory)
-onchip_rom  #(.PRG(PRG)) ROM (.address(torom16), .clock(a_clk), .q(a_dout));
+onchip_rom  #(.PRG(PRG), .IL(IL)) ROM (.address(torom_ext), .clock(a_clk), .q(a_dout));
 
 initial begin
 	pc = 0;
@@ -27,18 +31,18 @@ end
 always @(posedge a_clk) begin
 	 last_pc     <= pc;
 	 if (jmp) begin
-		pc <= a_addr + 1;
+		pc <= a_addr + one;
 	 end else if (~stall | (stall & stop_stall) ) begin
 		stop_stall <= 0;
-		pc <= pc+1;
+		pc <= pc+one;
 	 end else if (~stop_stall) begin
 		stop_stall <= 1;
 	 end
 end
 
 // Combinatorial logic to handl the address to send to the ROM
-assign stallig = stall & (~stop_stall);
-assign torom = (stallig? last_pc : (jmp ? a_addr : pc));
-assign torom16 = {1'b0, torom};
+assign stalling = stall & (~stop_stall);
+assign torom = (stalling? last_pc : (jmp ? a_addr : pc));
+assign torom_ext = ( IL==16 ? {1'b0, torom} : torom ) ;
  
 endmodule

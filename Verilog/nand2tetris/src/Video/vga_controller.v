@@ -14,9 +14,9 @@ output reg [3:0] G,
 output reg [3:0] B);
 
 // Temporaries
-reg [9:0] hcount, vcount;
-reg [3:0] bit_count;
-
+reg  [9:0]  hcount, vcount;
+reg  [3:0]  bit_count;
+wire [14:0] address_pixel_plus_1;
 
 initial begin
   hsync      = 1;
@@ -42,9 +42,9 @@ if(hcount==799) begin
 	if (vcount == 524) 
 		vcount <= 0;
 	else
-		vcount <= vcount+1;
+		vcount <= vcount+10'h1;
 end else 
-	hcount <= hcount+1;
+	hcount <= hcount+10'h1;
 
 if  (vcount >= 489 && vcount < 491)
 	vsync <= 1'b0;
@@ -58,6 +58,9 @@ else
 	
 end
 
+
+assign address_pixel_plus_1 = (address_pixel + 15'h1);
+
 // pixel filling
 always @(posedge clk_vga) begin
     if(hcount >= 0 && hcount <512 && vcount >= 0 && vcount < 256) begin
@@ -65,10 +68,11 @@ always @(posedge clk_vga) begin
 		G <= {4{data_pixel[hcount % 16]}};
 		B <= {4{data_pixel[hcount % 16]}};
 
-		bit_count <= bit_count+1;
+		bit_count <= bit_count+4'h1;
 		
+		// Start fetching the next data_pixel one cycle earlier
 		if (bit_count == 14) begin
-			address_pixel <= (address_pixel + 1) % 8192;
+			address_pixel <= address_pixel_plus_1[12:0];
 		end
 		
     end else begin

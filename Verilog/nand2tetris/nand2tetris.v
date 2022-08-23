@@ -38,6 +38,16 @@ module nand2tetris(
 	inout 		    [35:0]		nand2tetrisGPIO
 );
 
+//=======================================================
+//  Local parameters
+//=======================================================
+
+// Width of the instructions: 
+// - original nand2tetris has 16 bits, which means that ROM can be 32K big
+// - extended nand2tetris has 17 bits, whicn means that ROM can be 64K big
+
+localparam IL = 17;
+localparam PRG = "/mnt/data/nand2tetris/Verilog/nand2tetris/src/test/TestKeyboard/TestKeyboard.mif";
 
 
 //=======================================================
@@ -47,11 +57,10 @@ reg sim_clk;
 
 // Renaming 
 wire rst, clk;
-wire [11:0] data_pixel;
 wire [7:0] key_pressed;
+wire ps2_clk, ps2_data;
 
 assign rst = KEY[0];
-assign data_pixel = 12'hFFF;
 assign clk = MAX10_CLK1_50;
 //assign clk = sim_clk;
 
@@ -83,7 +92,7 @@ wire [15:0] regA;
 wire [15:0] regD;
 wire [15:0] regToDisplay;
 
-assign regToDisplay = (SW == 10'h0 ? 0 : (SW == 10'h1 ? regD : regA));
+assign regToDisplay = (SW == 10'h0 ? 16'h0 : (SW == 10'h1 ? regD : regA));
 
 
 arbitrator arbitrator(.address_in(addressM), 
@@ -145,11 +154,12 @@ vga_controller vga_controller(
 //.writeM(writeM),
 //.addressM(addressM));	
 
-wire [15:0] instruction_wire;
-wire [14:0] addressI;
+
+wire [IL-1:0] instruction_wire;
+wire [IL-2:0] addressI;
 wire loadPC, stall;
 
-single_port_rom #(.PRG("/mnt/data/nand2tetris/Verilog/nand2tetris/src/test/HelloWorld/HelloWorld.mif")) rom(.a_dout(instruction_wire), 
+single_port_rom #(.PRG(PRG), .IL(IL)) rom(.a_dout(instruction_wire), 
                     .a_addr(addressI), 
 						  .a_clk(clk),
 						  .stall(stall),
@@ -158,9 +168,9 @@ single_port_rom #(.PRG("/mnt/data/nand2tetris/Verilog/nand2tetris/src/test/Hello
 
 
 // CPU
-CPU CPU(.instruction(instruction_wire), 
+CPU #(.IL(IL)) CPU(.instruction(instruction_wire), 
         .inM(inM),
-		  .reset(switchR),
+		  .reset(rst),
 		  .outM(outM),
 		  .writeM(writeM),
 		  .addressM(addressM),
@@ -183,16 +193,16 @@ segment_display segment_display4(HEX4, regToDisplay[11:8]);
 segment_display segment_display5(HEX5, regToDisplay[15:12]);
 
 
-
-always
-#1 sim_clk = ~sim_clk;
-
-initial begin
-
-sim_clk = 1'b0;
-
+// Use this only for simulation (it will slow down compilation)
+//always
+//#1 sim_clk = ~sim_clk;
+//
+//initial begin
+//
+//sim_clk = 1'b0;
+//
 //$monitor("%d] %d\nregD=%d-regA=%d",$time, $signed(instruction_wire), $signed(regD), $signed(regA));
-
-end
+//
+//end
 
 endmodule

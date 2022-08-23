@@ -1,9 +1,9 @@
-module CPU(
-input[15:0] instruction, inM,
+module CPU #(parameter IL=16)(
+input[IL-1:0] instruction, inM,
 input clk, reset,
 output wire [15:0] outM, 
 output wire [14:0] addressM,
-output wire [14:0] addressI,
+output wire [IL-2:0] addressI,
 output wire loadPC,
 output wire writeM,
 output wire stall,
@@ -16,7 +16,8 @@ initial begin
 end
 
 // Control signals
-wire loadRegA, loadRegD, selM, selA, AMplus1, setOperandDTo1, izx, inx, izy, iny, inf, inno, jgt, jge, jlt, jne, jle, jmp;
+wire loadRegA, loadRegD, selM, selA, AMplus1, setOperandDTo1, izx, inx, izy, iny, inf, inno;
+wire jgt, jge, jlt, jne, jle, jmp, jeq;
 
 // ALU operands
 wire signed [15:0] operandA, operandD;
@@ -27,7 +28,7 @@ wire ozr, ong;
 
 wire tmpWriteM;
 
-Decoder Decoder (
+Decoder #(.IL(IL)) Decoder (
   // input
   .I(instruction),
   // output control signals
@@ -88,9 +89,9 @@ always @(posedge clk) begin
 	if (loadRegD && (state2 || !stall))
 	    D <= ALUout;
 	
-	state <= (stall & tmpWriteM) ? ~state : 0;
-	state2 <= (stall & loadRegD) ? ~state2 : 0;
-	state3 <= (stall & loadRegA) ? ~state3 : 0;
+	state <= (stall & tmpWriteM) ? ~state : 1'b0;
+	state2 <= (stall & loadRegD) ? ~state2 : 1'b0;
+	state3 <= (stall & loadRegA) ? ~state3 : 1'b0;
 end
 
 assign operandD = AMplus1 ? 1'b1 : D;
@@ -99,7 +100,7 @@ assign operandA = (setOperandDTo1 ? 15'h1 : (selM ? inM : A));
 
 // outputs 
 assign addressM = A[14:0];
-assign addressI = A[14:0];
+assign addressI = A[IL-2:0];
 assign loadPC = jeq & ozr | jgt & !ozr & !ong | jge & !ong | jlt & ong | jle & (ong | ozr) | jne & !ozr | jmp;
 
 endmodule

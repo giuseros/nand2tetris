@@ -1,0 +1,26 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/09/HelloWorld/Main.jack
+
+/** Test shapes. */
+class Main {
+   function void main() {
+      /* Prints some text using the standard library. */
+      var int l, a, b;
+      var string name;
+      let name = Keyboard.readLine("What's your name? ");
+      do Output.printString("Hello ");
+      do Output.printString(name);
+      do Output.println();
+      let a = Keyboard.readInt("Write an integer: ");
+      let b = Keyboard.readInt("Write another integer: ");
+      do Output.printString("The result of the sum is: ");
+      do Output.printInt((a+b));
+      do Output.println();
+      do Output.printString("The result of the product is: ");
+      do Output.printInt((a*b));
+      do Output.println();
+      return;
+   }
+}
