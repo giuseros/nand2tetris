@@ -47,7 +47,7 @@ module nand2tetris(
 // - extended nand2tetris has 17 bits, whicn means that ROM can be 64K big
 
 localparam IL = 17;
-localparam PRG = "/mnt/data/nand2tetris/Verilog/nand2tetris/src/test/TestScreen/TestScreen.mif";
+localparam PRG = "/mnt/data/nand2tetris/Verilog/nand2tetris/src/test/TestKeyboard/TestKeyboard.mif";
 
 
 //=======================================================
@@ -164,28 +164,16 @@ wire [IL-1:0] instruction_wire;
 wire [IL-2:0] addressI;
 wire loadPC, stall;
 
-single_port_rom #(.PRG(PRG), .IL(IL)) rom(.a_dout(instruction_wire), 
-                    .a_addr(addressI), 
-						  .a_clk(clk),
-						  .stall(stall),
-						  .jmp(loadPC),
-						  .rst(rst));
-
-
-
 // CPU
-CPU #(.IL(IL)) CPU(.instruction(instruction_wire), 
-        .inM(inM),
-		  .reset(rst),
-		  .outM(outM),
-		  .writeM(writeM),
-		  .addressM(addressM),
-		  .addressI(addressI),
-		  .loadPC(loadPC),
-		  .stall(stall),
-		  .clk(clk),
-		  .A(regA),
-		  .D(regD));
+CPU #(.IL(IL), .PRG(PRG)) CPU( 
+      .inM(inM),
+		.reset(rst),
+		.outM(outM),
+		.writeM(writeM),
+		.addressM(addressM),
+		.clk(clk),
+		.A(regA),
+		.D(regD));
 
 
 keyboard keboard(.clk(clk), .ps2_clk(ps2_clk), .ps2_data(ps2_data), .out(key_pressed));

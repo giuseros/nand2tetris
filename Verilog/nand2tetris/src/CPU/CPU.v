@@ -1,12 +1,10 @@
-module CPU #(parameter IL=16)(
-input[IL-1:0] instruction, inM,
+module CPU #(parameter IL=16, parameter PRG="")(
+
+input [15:0] inM,
 input clk, reset,
 output wire [15:0] outM, 
 output wire [14:0] addressM,
-output wire [IL-2:0] addressI,
-output wire loadPC,
 output wire writeM,
-output wire stall,
 output reg signed[15:0] D,
 output reg signed[15:0] A);
 
@@ -19,6 +17,11 @@ end
 wire loadRegA, loadRegD, selM, selA, AMplus1, setOperandDTo1, izx, inx, izy, iny, inf, inno;
 wire jgt, jge, jlt, jne, jle, jmp, jeq;
 
+// Fetch control signals
+wire loadPC, stall;
+wire[IL-1:0] instruction;
+wire[IL-2:0] addressI;
+
 // ALU operands
 wire signed [15:0] operandA, operandD;
 // ALU output
@@ -26,7 +29,20 @@ wire signed [15:0] ALUout;
 // ALU output flags
 wire ozr, ong;
 
+reg state;
+reg state2;
+reg state3;
+
 wire tmpWriteM;
+
+FetchUnit #(.IL(IL), .PRG(PRG)) FU(
+.clk(clk),
+.jmp(loadPC),
+.stall(stall),
+.jmp_addr(addressI),
+.instruction(instruction),
+.rst(rst)
+);
 
 Decoder #(.IL(IL)) Decoder (
   // input
@@ -70,9 +86,6 @@ ALU ALU(
 	  .zr(ozr),
 	  .ng(ong));
 
-reg state;
-reg state2;
-reg state3;
 
 initial begin
 state <= 0; // for writem
