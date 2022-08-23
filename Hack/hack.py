@@ -1,5 +1,7 @@
 import sys
 import re
+import os
+
 from argparse import ArgumentParser
 
 symbol_table = {}
@@ -220,11 +222,12 @@ def main():
     init_symbol_table()
     program_no_L = populate_symbol_table(program)
         
-    for instr in program_no_L:
-        print(code(parse(instr),args.il))
+    outfile = os.path.splitext(args.infile)[0] + ".hack"
+    with open(outfile, "w") as f:
+        for instr in program_no_L:
+            print(code(parse(instr),args.il), file=f)
+    
         
-
-
 if __name__=="__main__":
     main()
 
