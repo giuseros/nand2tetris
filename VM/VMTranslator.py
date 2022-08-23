@@ -329,6 +329,8 @@ def write_init():
 
 
 def write_hack(tokens, workspace, enable_init):
+    if enable_init:
+        write_init()
     for t in tokens:
         if t[0] == CommandType.C_PUSH:
             write_push(t[1], t[2], workspace)
@@ -353,6 +355,8 @@ def write_hack(tokens, workspace, enable_init):
 
 if __name__=="__main__":
     source = sys.argv[1]
+    source = os.path.abspath(source)
+    print(f"Compiling: {source}")
     orig_stdout = sys.stdout
 
     sources = []
@@ -372,13 +376,9 @@ if __name__=="__main__":
 
 
     with open(program_path, "w") as f:
-        sys.stdout = f
-
-        if enable_init:
-            write_init()
         for s in sources:
             tokens = parse(s)
             static_workspace = os.path.splitext(os.path.split(s)[-1])[0]
+            sys.stdout = f
             write_hack(tokens, static_workspace, enable_init)
-
-        sys.stdout = orig_stdout
+            sys.stdout = orig_stdout

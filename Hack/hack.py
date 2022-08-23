@@ -1,5 +1,6 @@
 import sys
 import re
+from argparse import ArgumentParser
 
 symbol_table = {}
 
@@ -45,10 +46,10 @@ def populate_symbol_table(program):
 
 
 
-def dec2bin(dec):
+def dec2bin(dec, il=16):
     binstr = ''
     dec=int(dec)
-    numzeros=15
+    numzeros=il-1
     while True:
         binstr = str(dec % 2) + binstr
         dec=dec//2
@@ -177,10 +178,10 @@ def decode_jmp(jmp):
     if jmp == 'JMP':
         return '111'
 
-def code(instr_tuple):
+def code(instr_tuple, il=16):
     if len(instr_tuple)==1:
         addr = instr_tuple[0]
-        return '0' + dec2bin(addr)
+        return '0' + dec2bin(addr,il)
     else:
         dest  = instr_tuple[0]
         comp = instr_tuple[1]
@@ -189,7 +190,8 @@ def code(instr_tuple):
         destcode = decode_dest(dest)
         compcode = decode_comp(comp)
         jmpcode = decode_jmp(jmp)
-        return '111'+compcode+destcode+jmpcode
+        fillcode = '111' if il==16 else '1111'
+        return fillcode+compcode+destcode+jmpcode
 
 
 def getprogam(fname):
@@ -207,16 +209,22 @@ def getprogam(fname):
         program.append(instr)
     return program
 
-def main(fname):
-    program = getprogam(fname)
+def main():
+    parser = ArgumentParser(description='A script to convert hack assembly to a binary file')
+
+    parser.add_argument('infile', help='Input File', metavar='FILE')
+    parser.add_argument('--il', type=int, default=16)
+    args = parser.parse_args()
+    program = getprogam(args.infile)
+
     init_symbol_table()
     program_no_L = populate_symbol_table(program)
         
     for instr in program_no_L:
-        print(code(parse(instr)))
+        print(code(parse(instr),args.il))
         
 
 
 if __name__=="__main__":
-    main(sys.argv[1])
+    main()
 
