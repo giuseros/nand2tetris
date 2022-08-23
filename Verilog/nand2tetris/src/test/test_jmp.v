@@ -3,30 +3,33 @@
 module test_jmp(input wire dummy);
 reg clk, reset;
 
+localparam IL = 17;
+localparam PRG = "/mnt/data/nand2tetris/Verilog/nand2tetris/src/test/test_jmp.mif";
+
 wire signed [15:0] regD;
 wire [15:0] regA;
 wire writeM;
 wire [15:0] data_in, data_out;
-wire [14:0] addressM;
+wire [IL-2:0] addressM;
 
-wire [15:0] instruction;
-wire [14:0] addressI;
+wire [IL-1:0] instruction;
+wire [IL-2:0] addressI;
 wire loadPC, stall;
 
-single_port_rom #(.PRG("/mnt/data/nand2tetris/Verilog/nand2tetris/src/test/test_jmp.mif")) rom(.a_dout(instruction), 
+single_port_rom #(.PRG(PRG), .IL(IL)) rom(.a_dout(instruction), 
                     .a_addr(addressI), 
 						  .a_clk(clk),
 						  .stall(stall),
 						  .jmp(loadPC));
 						  
 
-single_port_ram cpu_ram(.a_clk(clk), 
+single_port_ram  cpu_ram(.a_clk(clk), 
                     .a_wr(writeM), 
 						  .a_addr(addressM), 
 						  .a_din(data_in), 
 						  .a_dout(data_out));
 						 
-CPU CPU(.instruction(instruction), 
+CPU #(.IL(IL)) CPU(.instruction(instruction), 
         .clk(clk), .reset(0), .stall(stall),
 		  .writeM(writeM),
 		  .outM(data_in),
