@@ -56,12 +56,16 @@ localparam PRG = "/mnt/data/nand2tetris/Verilog/nand2tetris/src/test/TestKeyboar
 reg sim_clk;
 
 // Renaming 
-wire rst, clk;
+wire rst, clk, clk50;
 wire [7:0] key_pressed;
 wire ps2_clk, ps2_data;
 
 assign rst = KEY[0];
-assign clk = MAX10_CLK1_50;
+nand2tetris_pll PLL(
+	.inclk0(MAX10_CLK1_50),
+	.c0(clk));
+	
+assign clk50 = MAX10_CLK1_50;
 //assign clk = sim_clk;
 
 assign ps2_clk = nand2tetrisGPIO[0];
@@ -93,6 +97,7 @@ wire [15:0] regD;
 wire [15:0] regToDisplay;
 
 assign regToDisplay = (SW == 10'h0 ? 16'h0 : (SW == 10'h1 ? regD : regA));
+
 
 
 arbitrator arbitrator(.address_in(addressM), 
@@ -135,7 +140,7 @@ dual_port_ram video_ram(.a_clk(clk),
 
 
 vga_controller vga_controller(
- .clk(clk), 
+ .clk(clk50), 
  .reset(rst), 
  .data_pixel(data_vga), 
  .address_pixel(address_vga),
