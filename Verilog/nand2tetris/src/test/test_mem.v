@@ -13,7 +13,10 @@ wire [15:0] instruction;
 wire [14:0] addressI;
 wire loadPC, stall;
 
-single_port_rom #(.PRG("C:/Users/g00621769/repos/nand2tetris/Verilog/nand2tetris/src/test/test_mem.bin")) rom(.a_dout(instruction), 
+localparam PRG = "C:/Users/g00621769/repos/nand2tetris/Verilog/nand2tetris/src/test/BasicLoop.mif";
+localparam IL = 17;
+
+single_port_rom #(.PRG(PRG), .IL(IL)) rom(.a_dout(instruction), 
                     .a_addr(addressI), 
 						  .a_clk(clk),
 						  .stall(stall),
