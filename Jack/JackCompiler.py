@@ -166,6 +166,7 @@ class CompileEngine:
         self.routineSymbolTable = SymbolTable()
         self.currentClass = ""
         self.emitter = VMWriter()
+        self.isConstructor=False
 
     def lookup(self, name):
         table = None
@@ -302,7 +303,11 @@ class CompileEngine:
             arg_count += 1 
 
             # Push this on the stack
-            self.emitter.emitPush("argument", 0)
+            if self.isConstructor:
+                self.emitter.emitPush("pointer", 0)
+            else:
+                self.emitter.emitPush("argument", 0)
+
             self.exprList(inc_arg_count)
             if not self.symbol(")"):
                 return self.syntax_error()
@@ -698,17 +703,22 @@ class CompileEngine:
         """ subroutineDec : ('constructor' | 'function' | 'method') ('void' | type) subroutineName '(' parameterList ')' """
 
         is_method = False
-        is_constructor = False
+        #is_constructor = False
         routine_name = ""
         types = []
         names = []
         
         def init(t):
-            nonlocal is_method, is_constructor
+            nonlocal is_method
             if t.lexeme == "constructor":
-                is_constructor = True
+                is_method = False
+                self.isConstructor = True
             elif t.lexeme == "method":
                 is_method = True
+                self.isConstructor = False
+            else:
+                is_method = False
+                self.isConstructor = False
 
         def set_routine_name(t):
             nonlocal routine_name
@@ -724,7 +734,7 @@ class CompileEngine:
 
         if (
             self.keyword("constructor", init)
-            or self.keyword("function")
+            or self.keyword("function", init)
             or self.keyword("method", init)
         ):
             self.routineSymbolTable.clear(is_method)
@@ -759,7 +769,7 @@ class CompileEngine:
 
             # Now we can emit the signature of the function
             num_locals = self.routineSymbolTable.varCount("var")
-            if is_constructor:
+            if self.isConstructor:
                 num_fields = self.classSymbolTable.varCount("field")
                 self.emitter.emitConstructorSignature(self.currentClass, routine_name, num_locals, num_fields)
             elif is_method:
