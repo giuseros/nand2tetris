@@ -206,6 +206,7 @@ class Output {
     /** Displays the given character at the cursor location,
      *  and advances the cursor one column forward. */
     function void printChar(char c) {
+        var Array screen;
         var int i, x, y, map, address, value, line, shift;
 
         if (c = 128){
@@ -225,8 +226,8 @@ class Output {
             let x = cur_j*8;
             let y = (cur_i*11)+i;
             let address = (32*y) + (x/16);
-            let value = Memory.peek(16384 + address);
-            do Memory.poke(16384+address, line|value);
+            let value = screen[16384 + address];
+            let screen[16384+address] =  line|value;
             let i = i +1;
         }
         do Output.moveCursor(cur_i, cur_j+1);
