@@ -12,7 +12,15 @@ I tried to be as close as possible to the original design. So I implemented:
 - Video controller
 - PS2 keyboard controller
 
+
 ## Boards 
 For now I only tested the end-to-end flow on the following board:
 - [DE10-Lite](https://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=1021)
 
+## My Stackoverflow posts
+I have had the help of different StackOverflowers to be able to complete this project. These are the posts I wrote to get help:
+- [How to implement nand2tetris processor on a real FPGA](https://stackoverflow.com/questions/66627417/how-to-implement-nand2tetris-processor-on-a-real-fpga)
+- [Verilog/SystemVerilog: passing a slice of an unpacked array to a module](https://stackoverflow.com/questions/72021521/verilog-systemverilog-passing-a-slice-of-an-unpacked-array-to-a-module)
+- [Scan codes from PS/2 keyboard misbehaviors](https://electronics.stackexchange.com/questions/625609/scan-codes-from-ps-2-keyboard-misbehaviors/626276#626276)
+
+I am citing these because I think they make an interesting reading for whomever wants to try to do the same
