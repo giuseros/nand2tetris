@@ -10,10 +10,12 @@ from .JackLexer import *
 class SymbolTable:
     def __init__(self):
         self.table = {}
-        self.kind_count = {"static": 0, "field":0, "argument":0, "var":0}
+        self.kind_count = {"static": 0, "field": 0, "argument": 0, "var": 0}
+
     def define(self, name, type, kind):
         self.table[name] = (type, kind, self.kind_count[kind])
         self.kind_count[kind] += 1
+
     def varCount(self, kind):
         count = 0
         for name in self.table:
@@ -21,53 +23,67 @@ class SymbolTable:
             if k == kind:
                 count += 1
         return count
-    def kindOf(self,name):
+
+    def kindOf(self, name):
         return self.table[name][1]
+
     def typeOf(self, name):
         return self.table[name][0]
+
     def indexOf(self, name):
         return self.table[name][2]
+
     def clear(self, is_method):
         self.table = {}
         argument_start_from = 1 if is_method else 0
-        self.kind_count = {"static": 0, "field":0, "argument":argument_start_from, "var":0}
+        self.kind_count = {
+            "static": 0,
+            "field": 0,
+            "argument": argument_start_from,
+            "var": 0,
+        }
+
     def lookup(self, name):
         return name in self.table
+
     def __str__(self):
         out = "name\ttype\tkind\tidx\n"
         for n in self.table:
             out += f"{n}\t{self.table[n][0]}\t{self.table[n][1]}\t{self.indexOf(n)}\n"
         return out
-        
+
+
 class VMWriter:
     def __init__(self):
         self.labels_cnt = {}
         self.ir = ""
 
-    def uniqueLabel(self, lbl, prefix ):
+    def uniqueLabel(self, lbl, prefix):
         if lbl not in self.labels_cnt:
             self.labels_cnt[lbl] = 0
 
         unique_lbl = f"{prefix}_{lbl}{self.labels_cnt[lbl]}"
         self.labels_cnt[lbl] += 1
         return unique_lbl
-        
+
     def emitLabel(self, lbl):
-        self.ir+=(f"label {lbl}\n")
-    
+        self.ir += f"label {lbl}\n"
+
     def emit(self, raw_instr):
-        self.ir+=f"{raw_instr}\n"
-    
+        self.ir += f"{raw_instr}\n"
+
     def emitIfGoto(self, lbl):
-        self.ir+=(f"if-goto {lbl}\n")
+        self.ir += f"if-goto {lbl}\n"
 
     def emitGoto(self, lbl):
-        self.ir+=(f"goto {lbl}\n")
+        self.ir += f"goto {lbl}\n"
 
     def emitSignature(self, class_name, function_name, num_params):
-        self.ir+=(f"function {class_name}.{function_name} {num_params}\n")
+        self.ir += f"function {class_name}.{function_name} {num_params}\n"
 
-    def emitConstructorSignature(self, class_name, routine_name, num_locals, num_fields):
+    def emitConstructorSignature(
+        self, class_name, routine_name, num_locals, num_fields
+    ):
         self.emitSignature(class_name, routine_name, num_locals)
         self.emitPush("constant", num_fields)
         self.emitFunctionCall("Memory", "alloc", 1)
@@ -86,7 +102,7 @@ class VMWriter:
         else:
             segment = kind
 
-        self.ir+=(f"push {segment} {val}\n")
+        self.ir += f"push {segment} {val}\n"
 
     def emitPop(self, kind, idx):
         if kind == "var":
@@ -95,10 +111,10 @@ class VMWriter:
             segment = "this"
         else:
             segment = kind
-        self.ir+=(f"pop {segment} {idx}\n")
+        self.ir += f"pop {segment} {idx}\n"
 
     def emitReturn(self):
-        self.ir+=("return\n")
+        self.ir += "return\n"
 
     def emitArithmetic(self, op):
         if op == "+":
@@ -125,12 +141,12 @@ class VMWriter:
             self.emit("eq")
         else:
             print("Unknown operator")
-    
+
     def emitFunctionCall(self, class_name, fun_name, num_params):
         if class_name:
-            self.ir+=(f"call {class_name}.{fun_name} {num_params}\n")
+            self.ir += f"call {class_name}.{fun_name} {num_params}\n"
         else:
-            self.ir+=(f"call {fun_name} {num_params}\n")
+            self.ir += f"call {fun_name} {num_params}\n"
 
     def emitString(self, const_str):
         self.emitPush("constant", len(const_str))
@@ -138,7 +154,7 @@ class VMWriter:
         for c in const_str:
             self.emitPush("constant", ord(c))
             self.emitFunctionCall("String", "appendChar", 2)
-        
+
     def emitBoolean(self, tok):
         if tok == "true":
             self.emitPush("constant", 0)
@@ -148,7 +164,7 @@ class VMWriter:
 
     def __repr__(self):
         return self.ir
-    
+
     def save(self, file_name):
         with open(file_name, "w") as f:
             print(self.ir, file=f)
@@ -166,7 +182,7 @@ class CompileEngine:
         self.routineSymbolTable = SymbolTable()
         self.currentClass = ""
         self.emitter = VMWriter()
-        self.isConstructor=False
+        self.isConstructor = False
 
     def lookup(self, name):
         table = None
@@ -176,7 +192,7 @@ class CompileEngine:
             table = self.classSymbolTable
         else:
             return None
-        
+
         return (table.typeOf(name), table.kindOf(name), table.indexOf(name))
 
     def next_token(self):
@@ -198,7 +214,7 @@ class CompileEngine:
     # Basic production rules #
     ##########################
 
-    def keyword(self, lexeme, action=lambda x : x):
+    def keyword(self, lexeme, action=lambda x: x):
         """ Recognize a keyword """
         tok = self.cur_tok
         if tok.type == TokenType.keyword and tok.lexeme == lexeme:
@@ -207,7 +223,7 @@ class CompileEngine:
             return True
         return False
 
-    def identifier(self, action=lambda x:x):
+    def identifier(self, action=lambda x: x):
         """ Recognize an identifier"""
         tok = self.cur_tok
         if tok.type == TokenType.identifier:
@@ -224,7 +240,7 @@ class CompileEngine:
             return True
         return False
 
-    def type(self, action=lambda x:x):
+    def type(self, action=lambda x: x):
         """" Recognize a type """
         if self.cur_tok.type == TokenType.keyword and self.cur_tok.lexeme in [
             "int",
@@ -240,15 +256,15 @@ class CompileEngine:
         """" Recognize a return type """
         return self.keyword("void") or self.type()
 
-    def className(self, action=lambda x:x):
+    def className(self, action=lambda x: x):
         """" Recognize a class name"""
         return self.identifier(action)
 
-    def subroutineName(self, action=lambda x:x):
+    def subroutineName(self, action=lambda x: x):
         """" Recognize a subroutine name"""
         return self.identifier(action)
 
-    def varName(self, action=lambda x:x):
+    def varName(self, action=lambda x: x):
         """" Recognize a variable name"""
         return self.identifier(action)
 
@@ -256,7 +272,7 @@ class CompileEngine:
     # Production rules #
     ####################
 
-    def paramList(self, action1 = lambda x:x, action2 = lambda x:x):
+    def paramList(self, action1=lambda x: x, action2=lambda x: x):
         """ Recognize ((type varName)(',' type varName)*)?"""
 
         if self.type(action1):
@@ -271,13 +287,13 @@ class CompileEngine:
 
         return False
 
-    def additionalExprs(self, action=lambda x:x):
+    def additionalExprs(self, action=lambda x: x):
         if self.symbol(","):
             action(self.cur_tok)
             self.expr()
             self.additionalExprs(action)
 
-    def exprList(self, action = lambda x:x):
+    def exprList(self, action=lambda x: x):
         if self.cur_tok.lexeme == ")":
             return True
 
@@ -291,16 +307,18 @@ class CompileEngine:
 
         arg_count = 0
         function_name = ""
+
         def inc_arg_count(t):
             nonlocal arg_count
             arg_count += 1
+
         def set_function_name(tok):
             nonlocal function_name
             function_name = tok.lexeme
 
         if lex1 == "(":
             # self argument
-            arg_count += 1 
+            arg_count += 1
 
             # Push this on the stack
             if self.isConstructor:
@@ -319,7 +337,6 @@ class CompileEngine:
 
             if not self.symbol("("):
                 return self.syntax_error()
-
 
             # if lex0 is a variable of a Class, then call
             # Class.fun_name
@@ -402,7 +419,7 @@ class CompileEngine:
             else:
                 (t, k, p) = self.lookup(tok.lexeme)
                 self.emitter.emitPush(k, p)
-            
+
             return True
 
         else:
@@ -431,10 +448,10 @@ class CompileEngine:
     def letStmt(self):
         """ letStatement : 'let' varName ('[' expression ']')? '=' expression ';' """
         var_name = ""
+
         def set_var_name(t):
             nonlocal var_name
             var_name = t.lexeme
-        
 
         if not self.varName(set_var_name):
             return self.syntax_error()
@@ -499,7 +516,6 @@ class CompileEngine:
 
         # Goto end_lable
         self.emitter.emitGoto(if_end_lbl)
-
 
         if not self.symbol("}"):
             return self.syntax_error()
@@ -579,7 +595,7 @@ class CompileEngine:
 
         return True
 
-    def varNameList(self, action=lambda x:x):
+    def varNameList(self, action=lambda x: x):
         if self.symbol(","):
             if not self.varName(action):
                 return self.syntax_error()
@@ -590,11 +606,13 @@ class CompileEngine:
     def varDecList(self):
         type = ""
         names = []
+
         def save_type(toc):
-            nonlocal type  
+            nonlocal type
             type = toc.lexeme
+
         def save_names(toc):
-            nonlocal names 
+            nonlocal names
             names.append(toc.lexeme)
 
         if self.keyword("var"):
@@ -607,7 +625,6 @@ class CompileEngine:
                 return self.syntax_error()
             for name in names:
                 self.routineSymbolTable.define(name, type, "var")
-
 
             self.varDecList()
             return True
@@ -644,7 +661,7 @@ class CompileEngine:
             return False
 
     # Inlining this production to get access to the number of variables in the body
-    #def subroutineBody(self):
+    # def subroutineBody(self):
     #    """ subroutineBody : '{' varDec* statements '}' """
     #    if not self.symbol("{"):
     #        return self.syntax_error()
@@ -669,14 +686,17 @@ class CompileEngine:
         type = ""
         kind = ""
         names = []
+
         def save_kind(tok):
             nonlocal kind
             kind = tok.lexeme
+
         def save_type(toc):
-            nonlocal type  
+            nonlocal type
             type = toc.lexeme
+
         def save_names(toc):
-            nonlocal names 
+            nonlocal names
             names.append(toc.lexeme)
 
         # Rule: add variable to the Symbol table
@@ -689,10 +709,10 @@ class CompileEngine:
 
             if not self.symbol(";"):
                 return self.syntax_error()
-            
+
             for name in names:
                 self.classSymbolTable.define(name, type, kind)
-            
+
             self.classVarDec()
 
             return True
@@ -703,11 +723,11 @@ class CompileEngine:
         """ subroutineDec : ('constructor' | 'function' | 'method') ('void' | type) subroutineName '(' parameterList ')' """
 
         is_method = False
-        #is_constructor = False
+        # is_constructor = False
         routine_name = ""
         types = []
         names = []
-        
+
         def init(t):
             nonlocal is_method
             if t.lexeme == "constructor":
@@ -725,11 +745,11 @@ class CompileEngine:
             routine_name = t.lexeme
 
         def save_types(toc):
-            nonlocal types  
+            nonlocal types
             types.append(toc.lexeme)
 
         def save_names(toc):
-            nonlocal names 
+            nonlocal names
             names.append(toc.lexeme)
 
         if (
@@ -756,8 +776,6 @@ class CompileEngine:
             if not self.symbol(")"):
                 return self.syntax_error()
 
-
-    
             # Inlining this production: the issue is that we need the number of variables
             # to emit the signature of the function
             # subroutineBody : '{' varDec* statements '}'
@@ -771,12 +789,15 @@ class CompileEngine:
             num_locals = self.routineSymbolTable.varCount("var")
             if self.isConstructor:
                 num_fields = self.classSymbolTable.varCount("field")
-                self.emitter.emitConstructorSignature(self.currentClass, routine_name, num_locals, num_fields)
+                self.emitter.emitConstructorSignature(
+                    self.currentClass, routine_name, num_locals, num_fields
+                )
             elif is_method:
-                self.emitter.emitMethodSignature(self.currentClass, routine_name, num_locals)
-            else: # if function
+                self.emitter.emitMethodSignature(
+                    self.currentClass, routine_name, num_locals
+                )
+            else:  # if function
                 self.emitter.emitSignature(self.currentClass, routine_name, num_locals)
-
 
             self.statementList()
 
