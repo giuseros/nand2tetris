@@ -14,15 +14,36 @@ class Screen {
     /** Initializes the Screen. */
     static boolean color;
     static Array twoToThe;
+    static Array screen;
+    static Array emptys;
+    static Array emptye;
+
+
     function void init() {
-        var int i;
+        var int i, sume, sums;
         let color = true;
         let twoToThe = Array.new(15);
+        let emptye = Array.new(16);
+        let emptys = Array.new(16);
 
         let twoToThe[0] = 1;
+
+        let emptys[0] = -1;
+        let emptye[0] = -1;
+
+        let emptys[1] = 32767;
+        let emptye[1] = -2;
+
         let i = 1;
         while (i < 16){
             let twoToThe[i] = 2*twoToThe[i-1];
+            let i = i + 1;
+        }
+
+        let i = 2;
+        while (i < 16){
+            let emptye[i] = -(twoToThe[i]);
+            let emptys[i] = emptys[i-1]-twoToThe[16-i];
             let i = i + 1;
         }
         return;
@@ -52,7 +73,7 @@ class Screen {
     function void drawPixel(int x, int y) {
         var int address, x_mod_16, value;
         let address = ((32*y) + (x/16));
-        let value = Memory.peek(16384 + address);
+        let value = screen[16384 + address];
 
         let x_mod_16 = x & 15;
         if (color){
@@ -60,21 +81,14 @@ class Screen {
         }else {
             let value = value & (~twoToThe[x_mod_16]);
         }
-        do Memory.poke(16384 + address, value);
+        let screen[16384 + address] = value;
         return;
-    }
-
-    function boolean le(int a,int b){
-        if ((a<b) | (a=b)){
-            return true;
-        } else {
-            return false;
-        }
     }
 
     /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
     function void drawLine(int x1, int y1, int x2, int y2) {
         var int a, b, diff,dx,dy, dirx, diry;
+        var int dirxa, dirxdx, diryb, dirydy;
 
         let dx = x2-x1;
         let dy = y2-y1;
@@ -91,8 +105,11 @@ class Screen {
             let diry = -1;
         }
 
+        let dirxdx = (dirx*dx)+1;
+        let dirydy = (diry*dy)+1;
+
         if (dy = 0){
-            while(Screen.le(dirx*a, dirx*dx)){
+            while( (dirx*a) < dirxdx){
                 do Screen.drawPixel(x1+a, y1);
                 let a = a+dirx;
             }
@@ -100,15 +117,14 @@ class Screen {
         } 
 
         if (dx = 0){
-            while(Screen.le(diry*b, diry*dy)){
+            while((diry*b) < dirydy){
                 do Screen.drawPixel(x1, y1+b);
                 let b = b+diry;
             }
             return;
         }
 
-
-        while(Screen.le(dirx*a, dirx*dx) & Screen.le(diry*b, diry*dy)){
+        while(((dirx*a)<dirxdx) & ((diry*b)< dirydy)){
             do Screen.drawPixel(x1+a, y1+b);
             if (diff <0){
                 let a = a+dirx;
@@ -122,12 +138,63 @@ class Screen {
         }
         return;
     }
+    
+    function void drawHLine(int x1, int x2, int y) {
+        // Optimized routine to draw horizontal lines
+
+        var int x11, x11addr, x22, x22addr, curaddr, es, ee, K,t, dx1, dx2;
+        var int intersect;
+        let K = -16;
+        // Compute points that are multiple of 16
+        let x11 = (x1 & K);  // floor(x1/16)*16
+        let x22 = (x2+16) & K; // ceil((x2+1)/16)*16
+
+        let dx1 = x1-x11;
+        let dx2 = x22 - x2-1;
+        let t = (32*y);
+
+        // Compute boundary addresses
+        let x11addr = (t + (x11/16)) + 16384;
+        let x22addr = (t + (x22/16)) + 16384;
+
+        // Edge case: the boundary addresses are the same
+        if (x11addr = (x22addr-1)){
+            let intersect = emptys[dx2] & emptye[dx1];
+            if (color){
+                let screen[x11addr] = screen[x11addr] | intersect;
+            } else {
+                let screen[x11addr] = screen[x11addr] & (~intersect);
+            }
+            return;
+        }
+
+        // Normal case: fill the addresses in the middle: we know how to handle
+        // the first and the last address
+        let curaddr = x11addr+1;
+        while (curaddr < (x22addr-1)){
+            let screen[curaddr] = color;
+            let curaddr = curaddr + 1;
+        }
+
+        // Set the first and last address to known words
+        if (color){
+            let screen[x11addr] = screen[x11addr] | emptye[dx1];
+            let screen[x22addr-1] = screen[x22addr-1] | emptys[dx2];
+        } else {
+            let screen[x22addr-1] = screen[x22addr-1] & (~emptys[dx2]);
+            let screen[x11addr] = screen[x11addr] & (~emptye[dx1]);
+
+        }
+        return;
+    }
 
     /** Draws a filled rectangle whose top left corner is (x1, y1)
      * and bottom right corner is (x2,y2), using the current color. */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
-        while (Screen.le(y1,y2)){
-            do Screen.drawLine(x1,y1,x2,y1);
+        var int ylimit,a,dx;
+        let ylimit = (y2+1);
+        while (y1<ylimit){
+            do Screen.drawHLine(x1, x2, y1);
             let y1 = y1 + 1;
         }
         return;
@@ -135,9 +202,10 @@ class Screen {
 
     /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
     function void drawCircle(int x, int y, int r) {
-        var int dx,dy;
+        var int dx,dy,ylimit;
         let dy = -r;
-        while(Screen.le(dy,r)){
+        let ylimit=(dy+1);
+        while(dy<ylimit){
             let dx = Math.sqrt((r*r) - (dy*dy));
             do Screen.drawLine(x-dx, y+dy, x+dx,y+dy );
             let dy = dy + 1;

@@ -27,8 +27,7 @@ class Square {
    /** Draws the square on the screen. */
    method void draw() {
       do Screen.setColor(true);
-      //do Screen.drawRectangle(x, y, x + size, y + size);
-      do Screen.drawRectangle(x, y, x+20, y+20);
+      do Screen.drawRectangle(x, y, x + size, y + size);
       return;
    }
 

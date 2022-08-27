@@ -47,7 +47,7 @@ module nand2tetris(
 // - extended nand2tetris has 17 bits, whicn means that ROM can be 64K big
 
 localparam IL = 17;
-localparam PRG = "/mnt/data/nand2tetris/Verilog/nand2tetris/src/test/TestKeyboard/TestKeyboard.mif";
+localparam PRG = "/mnt/data/nand2tetris/Verilog/nand2tetris/src/test/Square/Square.mif";
 
 
 //=======================================================
